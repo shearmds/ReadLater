@@ -1,11 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="popup.css">
-    <script type="module" src="popup.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Read This Later</title>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-    <strong>Hello World!</strong>
+  <div id="app">
+    <header>
+      <h1>Read This Later</h1>
+      <div class="header-actions">
+        <input id="search" type="text" placeholder="Search…" autocomplete="off" />
+        <button id="save-btn">+ Save</button>
+      </div>
+    </header>
+
+    <div id="filter-bar">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="unread">Unread</button>
+      <button class="filter" data-filter="read">Read</button>
+    </div>
+
+    <ul id="list"></ul>
+
+    <div id="empty">
+      <p>No saved pages yet.</p>
+      <p class="hint">Tap <strong>+ Save</strong> to save the current page.</p>
+    </div>
+
+    <footer>
+      <button id="export-btn">Export JSON</button>
+      <label id="import-label">
+        Import JSON
+        <input id="import-input" type="file" accept=".json" />
+      </label>
+      <span id="import-msg"></span>
+    </footer>
+  </div>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>
