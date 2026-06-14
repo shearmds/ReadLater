@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4C63CD0A2FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CD092FD079910095DCAE /* ReadLater Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C63CD142FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CD132FD079910095DCAE /* ReadLater Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4C63CDA42FD0A6D90095DCAE /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */; };
+		4C63CDBB2FD0C5C50095DCAE /* ReadLater Share.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +28,13 @@
 			remoteGlobalIDString = 4C63CD122FD079910095DCAE;
 			remoteInfo = "ReadLater Extension (macOS)";
 		};
+		4C63CDB92FD0C5C50095DCAE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4C63CCD02FD0798F0095DCAE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C63CDB02FD0C5C50095DCAE;
+			remoteInfo = "ReadLater Share";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				4C63CDBB2FD0C5C50095DCAE /* ReadLater Share.appex in Embed Foundation Extensions */,
 				4C63CD0A2FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
@@ -58,6 +68,10 @@
 		4C63CCFE2FD079910095DCAE /* ReadLater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLater.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C63CD092FD079910095DCAE /* ReadLater Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C63CD132FD079910095DCAE /* ReadLater Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C63CD502FD087D80095DCAE /* ReadLater (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ReadLater (iOS).entitlements"; sourceTree = "<group>"; };
+		4C63CD512FD0881F0095DCAE /* ReadLater Extension (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ReadLater Extension (iOS).entitlements"; sourceTree = "<group>"; };
+		4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
+		4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Share.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -66,9 +80,11 @@
 			membershipExceptions = (
 				"/Localized: Resources/Main.html",
 				Assets.xcassets,
+				ReadLaterStore.swift,
 				Resources/Icon.png,
 				Resources/Script.js,
 				Resources/Style.css,
+				SaveURLIntent.swift,
 				ViewController.swift,
 			);
 			target = 4C63CCEB2FD079910095DCAE /* ReadLater (iOS) */;
@@ -92,6 +108,7 @@
 			membershipExceptions = (
 				"/Localized: Resources/Main.html",
 				Assets.xcassets,
+				ReadLaterStore.swift,
 				Resources/Icon.png,
 				Resources/Script.js,
 				Resources/Style.css,
@@ -136,6 +153,35 @@
 			);
 			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
 		};
+		4C63CD552FD08AF10095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ReadLaterStore.swift,
+				SaveURLIntent.swift,
+			);
+			target = 4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */;
+		};
+		4C63CDA62FD0A87F0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ReadLaterStore.swift,
+			);
+			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
+		};
+		4C63CDBF2FD0C5C50095DCAE /* Exceptions for "ReadLater Share" folder in "ReadLater Share" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
+		};
+		4C63CDC12FD0C5FD0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Share" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ReadLaterStore.swift,
+			);
+			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -144,6 +190,9 @@
 			exceptions = (
 				4C63CD372FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (iOS)" target */,
 				4C63CD412FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (macOS)" target */,
+				4C63CD552FD08AF10095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */,
+				4C63CDA62FD0A87F0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (macOS)" target */,
+				4C63CDC12FD0C5FD0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Share" target */,
 			);
 			path = "Shared (App)";
 			sourceTree = "<group>";
@@ -190,6 +239,14 @@
 			path = "macOS (Extension)";
 			sourceTree = "<group>";
 		};
+		4C63CDB22FD0C5C50095DCAE /* ReadLater Share */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C63CDBF2FD0C5C50095DCAE /* Exceptions for "ReadLater Share" folder in "ReadLater Share" target */,
+			);
+			path = "ReadLater Share";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +261,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C63CDA42FD0A6D90095DCAE /* ServiceManagement.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,18 +279,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4C63CDAE2FD0C5C50095DCAE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		4C63CCCF2FD0798F0095DCAE = {
 			isa = PBXGroup;
 			children = (
+				4C63CD512FD0881F0095DCAE /* ReadLater Extension (iOS).entitlements */,
+				4C63CD502FD087D80095DCAE /* ReadLater (iOS).entitlements */,
 				4C63CCD42FD0798F0095DCAE /* Shared (App) */,
 				4C63CCDD2FD079910095DCAE /* Shared (Extension) */,
 				4C63CCEE2FD079910095DCAE /* iOS (App) */,
 				4C63CCFF2FD079910095DCAE /* macOS (App) */,
 				4C63CD0D2FD079910095DCAE /* iOS (Extension) */,
 				4C63CD172FD079910095DCAE /* macOS (Extension) */,
+				4C63CDB22FD0C5C50095DCAE /* ReadLater Share */,
+				4C63CDA22FD0A6D90095DCAE /* Frameworks */,
 				4C63CCED2FD079910095DCAE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -244,8 +313,17 @@
 				4C63CCFE2FD079910095DCAE /* ReadLater.app */,
 				4C63CD092FD079910095DCAE /* ReadLater Extension.appex */,
 				4C63CD132FD079910095DCAE /* ReadLater Extension.appex */,
+				4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4C63CDA22FD0A6D90095DCAE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -264,6 +342,7 @@
 			);
 			dependencies = (
 				4C63CD0C2FD079910095DCAE /* PBXTargetDependency */,
+				4C63CDBA2FD0C5C50095DCAE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4C63CCEE2FD079910095DCAE /* iOS (App) */,
@@ -343,6 +422,28 @@
 			productReference = 4C63CD132FD079910095DCAE /* ReadLater Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		4C63CDB02FD0C5C50095DCAE /* ReadLater Share */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C63CDBC2FD0C5C50095DCAE /* Build configuration list for PBXNativeTarget "ReadLater Share" */;
+			buildPhases = (
+				4C63CDAD2FD0C5C50095DCAE /* Sources */,
+				4C63CDAE2FD0C5C50095DCAE /* Frameworks */,
+				4C63CDAF2FD0C5C50095DCAE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4C63CDB22FD0C5C50095DCAE /* ReadLater Share */,
+			);
+			name = "ReadLater Share";
+			packageProductDependencies = (
+			);
+			productName = "ReadLater Share";
+			productReference = 4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -365,6 +466,9 @@
 					4C63CD122FD079910095DCAE = {
 						CreatedOnToolsVersion = 26.5;
 					};
+					4C63CDB02FD0C5C50095DCAE = {
+						CreatedOnToolsVersion = 26.5;
+					};
 				};
 			};
 			buildConfigurationList = 4C63CCD32FD0798F0095DCAE /* Build configuration list for PBXProject "ReadLater" */;
@@ -385,6 +489,7 @@
 				4C63CCFD2FD079910095DCAE /* ReadLater (macOS) */,
 				4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */,
 				4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */,
+				4C63CDB02FD0C5C50095DCAE /* ReadLater Share */,
 			);
 		};
 /* End PBXProject section */
@@ -412,6 +517,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4C63CD112FD079910095DCAE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C63CDAF2FD0C5C50095DCAE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -449,6 +561,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4C63CDAD2FD0C5C50095DCAE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -462,14 +581,20 @@
 			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
 			targetProxy = 4C63CD152FD079910095DCAE /* PBXContainerItemProxy */;
 		};
+		4C63CDBA2FD0C5C50095DCAE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
+			targetProxy = 4C63CDB92FD0C5C50095DCAE /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4C63CD392FD079910095DCAE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
@@ -502,8 +627,9 @@
 		4C63CD3A2FD079910095DCAE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
@@ -539,8 +665,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
@@ -550,7 +677,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -580,8 +707,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
@@ -591,7 +719,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -694,6 +822,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ReadLater (macOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
@@ -703,6 +832,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ReadLater;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -735,6 +865,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ReadLater (macOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
@@ -744,6 +875,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ReadLater;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -887,6 +1019,69 @@
 			};
 			name = Release;
 		};
+		4C63CDBD2FD0C5C50095DCAE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = 95E9CZ9HW6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ReadLater Share/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater Share";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4C63CDBE2FD0C5C50095DCAE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = 95E9CZ9HW6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ReadLater Share/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater Share";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -931,6 +1126,15 @@
 			buildConfigurations = (
 				4C63CD482FD079910095DCAE /* Debug */,
 				4C63CD492FD079910095DCAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C63CDBC2FD0C5C50095DCAE /* Build configuration list for PBXNativeTarget "ReadLater Share" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C63CDBD2FD0C5C50095DCAE /* Debug */,
+				4C63CDBE2FD0C5C50095DCAE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
