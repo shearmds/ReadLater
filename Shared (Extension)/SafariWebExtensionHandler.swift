@@ -1,24 +1,11 @@
-//
-//  SafariWebExtensionHandler.swift
-//  Shared (Extension)
-//
-//  Created by Michael Shear on 03/06/2026.
-//
-
 import SafariServices
 import os.log
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     func beginRequest(with context: NSExtensionContext) {
+        NSLog("ReadLater: SafariWebExtensionHandler.beginRequest called")
         let request = context.inputItems.first as? NSExtensionItem
-
-        let profile: UUID?
-        if #available(iOS 17.0, macOS 14.0, *) {
-            profile = request?.userInfo?[SFExtensionProfileKey] as? UUID
-        } else {
-            profile = request?.userInfo?["profile"] as? UUID
-        }
 
         let message: Any?
         if #available(iOS 15.0, macOS 11.0, *) {
@@ -27,16 +14,54 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             message = request?.userInfo?["message"]
         }
 
-        os_log(.default, "Received message from browser.runtime.sendNativeMessage: %@ (profile: %@)", String(describing: message), profile?.uuidString ?? "none")
-
         let response = NSExtensionItem()
+        let reply = handle(message: message)
+
         if #available(iOS 15.0, macOS 11.0, *) {
-            response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
+            response.userInfo = [SFExtensionMessageKey: reply]
         } else {
-            response.userInfo = [ "message": [ "echo": message ] ]
+            response.userInfo = ["message": reply]
         }
 
-        context.completeRequest(returningItems: [ response ], completionHandler: nil)
+        context.completeRequest(returningItems: [response], completionHandler: nil)
     }
 
+    private func handle(message: Any?) -> [String: Any] {
+        guard let msg = message as? [String: Any],
+              let action = msg["action"] as? String else {
+            return ["error": "invalid message"]
+        }
+
+        let store = ReadLaterStore.shared
+
+        switch action {
+        case "getItems":
+            return ["items": store.toJSON()]
+
+        case "saveItem":
+            guard let url = msg["url"] as? String,
+                  let title = msg["title"] as? String else {
+                return ["error": "missing url or title"]
+            }
+            store.add(url: url, title: title)
+            return ["items": store.toJSON()]
+
+        case "deleteItem":
+            guard let url = msg["url"] as? String else {
+                return ["error": "missing url"]
+            }
+            store.delete(url: url)
+            return ["items": store.toJSON()]
+
+        case "toggleRead":
+            guard let url = msg["url"] as? String else {
+                return ["error": "missing url"]
+            }
+            store.toggleRead(url: url)
+            return ["items": store.toJSON()]
+
+        default:
+            return ["error": "unknown action"]
+        }
+    }
 }
