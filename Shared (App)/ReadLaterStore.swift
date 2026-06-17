@@ -59,7 +59,32 @@ class ReadLaterStore {
     private let storeKey = "readLater"
 
     private let syncURL = URL(string: "https://readlater-sync.shearm.workers.dev/sync")!
-    private let authToken = "c49e5160cfb655d1d93a6ca91a07decc260666656f8e8af2"
+    private let tokenKey = "syncToken"
+
+    /// Per-user sync key. Stored in the shared App Group so the app, the share
+    /// extension, and the Safari handler all use the same key. A fresh key is
+    /// generated on first access; paste an existing key (in Settings) to link
+    /// this device to your other devices.
+    var syncToken: String {
+        get {
+            let defaults = UserDefaults(suiteName: appGroupSuite)
+            if let existing = defaults?.string(forKey: tokenKey), existing.count >= 32 {
+                return existing
+            }
+            let generated = ReadLaterStore.generateToken()
+            defaults?.set(generated, forKey: tokenKey)
+            return generated
+        }
+        set {
+            UserDefaults(suiteName: appGroupSuite)?.set(newValue, forKey: tokenKey)
+        }
+    }
+
+    static func generateToken() -> String {
+        (UUID().uuidString + UUID().uuidString)
+            .replacingOccurrences(of: "-", with: "")
+            .lowercased()
+    }
 
     func load() -> [ReadLaterItem] {
         guard let data = UserDefaults(suiteName: appGroupSuite)?.data(forKey: storeKey),
@@ -139,7 +164,7 @@ class ReadLaterStore {
         var request = URLRequest(url: syncURL, timeoutInterval: 10)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(syncToken)", forHTTPHeaderField: "Authorization")
         request.httpBody = body
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in

@@ -4,7 +4,11 @@ struct ReadLaterView: View {
     @State private var items: [ReadLaterItem] = []
     @State private var filter: Filter = .unread
     @State private var searchText = ""
+    @State private var showSettings = false
+    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
     @Environment(\.horizontalSizeClass) private var hSizeClass
+
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
 
     enum Filter: String, CaseIterable {
         case all = "All", unread = "Unread", read = "Read"
@@ -39,12 +43,7 @@ struct ReadLaterView: View {
                 VStack(spacing: 0) {
                     // Gradient header — extends edge-to-edge; inner content is width-capped on iPad.
                     ZStack {
-                        LinearGradient(
-                            colors: [Color(red: 1.000, green: 0.541, blue: 0.298),
-                                     Color(red: 0.925, green: 0.251, blue: 0.478)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                        theme.gradient
                         .ignoresSafeArea(edges: .top)
 
                         VStack(spacing: 12) {
@@ -64,6 +63,11 @@ struct ReadLaterView: View {
                                         .padding(.vertical, 4)
                                         .background(.white.opacity(0.2))
                                         .clipShape(Capsule())
+                                }
+                                Button { showSettings = true } label: {
+                                    Image(systemName: "gearshape.fill")
+                                        .font(isRegular ? .title3 : .body)
+                                        .foregroundColor(.white.opacity(0.9))
                                 }
                             }
                             .padding(.horizontal)
@@ -113,6 +117,9 @@ struct ReadLaterView: View {
             .searchable(text: $searchText, prompt: "Search")
             .onAppear { refresh() }
             .refreshable { refresh() }
+            .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
+                SyncKeySettingsView()
+            }
         }
     }
 
@@ -210,5 +217,95 @@ struct ItemRow: View {
     private var displayTitle: String {
         let host = URL(string: item.url).flatMap { $0.host } ?? ""
         return (item.title == host || item.title == "www." + host) ? item.url : item.title
+    }
+}
+
+struct SyncKeySettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
+    @State private var key: String = ReadLaterStore.shared.syncToken
+    @State private var message: String?
+
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
+    private let columns = Array(repeating: GridItem(.flexible()), count: 6)
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Theme") {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(AppTheme.allCases, id: \.self) { t in
+                            Button { themeName = t.rawValue } label: {
+                                ZStack {
+                                    Circle().fill(t.gradient).frame(width: 44, height: 44)
+                                    if t == theme {
+                                        Circle().strokeBorder(.white, lineWidth: 2.5).frame(width: 44, height: 44)
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                Section {
+                    TextField("Sync key", text: $key, axis: .vertical)
+                        .font(.system(.footnote, design: .monospaced))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                } header: {
+                    Text("Sync Key")
+                } footer: {
+                    Text("Your sync key links your devices. Paste the same key on each device — this app, the browser extension, and the Raycast extension — to share one list. Keep it private: anyone with it can read your saved pages. There's no account recovery, so copy it somewhere safe.")
+                }
+
+                Section {
+                    Button("Copy Key") {
+                        UIPasteboard.general.string = key
+                        flash("Copied")
+                    }
+                    Button("Generate New Key") {
+                        key = ReadLaterStore.generateToken()
+                        flash("Generated — tap Save to use it")
+                    }
+                }
+
+                if let message {
+                    Section { Text(message).foregroundColor(.secondary) }
+                }
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
+                }
+            }
+        }
+    }
+
+    private func flash(_ text: String) {
+        message = text
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            if message == text { message = nil }
+        }
+    }
+
+    private func save() {
+        let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 32 else {
+            flash("Key must be at least 32 characters")
+            return
+        }
+        ReadLaterStore.shared.syncToken = trimmed
+        ReadLaterStore.shared.syncWithCloud()
+        dismiss()
     }
 }

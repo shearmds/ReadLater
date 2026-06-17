@@ -193,15 +193,17 @@ struct ReadLaterPopover: View {
 
     @State private var hoveredURL: String?
     @State private var launchAtLoginToggled: Bool = false
+    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
 
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
     private var unreadItems: [ReadLaterItem] { items.filter { !$0.read } }
-    private static let brandPink = Color(red: 0.925, green: 0.251, blue: 0.478)
-    private static let brandOrange = Color(red: 1.000, green: 0.541, blue: 0.298)
 
     var body: some View {
         VStack(spacing: 0) {
             header
             content
+            Divider()
+            themeRow
             Divider()
             footer
         }
@@ -210,11 +212,7 @@ struct ReadLaterPopover: View {
 
     private var header: some View {
         ZStack {
-            LinearGradient(
-                colors: [Self.brandOrange, Self.brandPink],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            theme.gradient
             HStack(spacing: 8) {
                 Image(systemName: "bookmark.fill")
                     .font(.system(size: 15, weight: .semibold))
@@ -274,7 +272,7 @@ struct ReadLaterPopover: View {
         Button(action: { onOpenItem(item.url) }) {
             HStack(spacing: 8) {
                 Circle()
-                    .fill(Self.brandPink)
+                    .fill(theme.end)
                     .frame(width: 5, height: 5)
                 Text(item.title)
                     .font(.system(size: 13))
@@ -289,6 +287,25 @@ struct ReadLaterPopover: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering in hoveredURL = hovering ? item.url : nil }
+    }
+
+    private var themeRow: some View {
+        HStack(spacing: 10) {
+            Spacer()
+            ForEach(AppTheme.allCases, id: \.self) { t in
+                Button { themeName = t.rawValue } label: {
+                    ZStack {
+                        Circle().fill(t.gradient).frame(width: 20, height: 20)
+                        if t == theme {
+                            Circle().strokeBorder(.white, lineWidth: 1.5).frame(width: 20, height: 20)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 7)
     }
 
     private var footer: some View {
