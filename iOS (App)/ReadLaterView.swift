@@ -5,10 +5,11 @@ struct ReadLaterView: View {
     @State private var filter: Filter = .unread
     @State private var searchText = ""
     @State private var showSettings = false
-    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
+    @State private var notesItem: ReadLaterItem?
+    @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
-    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
 
     enum Filter: String, CaseIterable {
         case all = "All", unread = "Unread", read = "Read"
@@ -17,7 +18,7 @@ struct ReadLaterView: View {
     private var isRegular: Bool { hSizeClass == .regular }
     private var headerHeight: CGFloat { isRegular ? 180 : 130 }
     private var contentMaxWidth: CGFloat { isRegular ? 760 : .infinity }
-    private var titleFont: Font { isRegular ? .system(size: 40, weight: .bold) : .largeTitle.bold() }
+    private var titleFont: Font { isRegular ? .system(size: 28, weight: .bold) : .title2.bold() }
 
     var filtered: [ReadLaterItem] {
         items.filter { item in
@@ -48,12 +49,11 @@ struct ReadLaterView: View {
 
                         VStack(spacing: 12) {
                             HStack {
-                                Image(systemName: "bookmark.fill")
-                                    .font(isRegular ? .title : .title2)
-                                    .foregroundColor(.white.opacity(0.9))
-                                Text("Read Later")
+                                Text("RTL: Research Sync")
                                     .font(titleFont)
                                     .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.6)
                                 Spacer()
                                 if unreadCount > 0 {
                                     Text("\(unreadCount) unread")
@@ -102,7 +102,8 @@ struct ReadLaterView: View {
                                     ItemRow(item: item,
                                         onTap:        { openAndMarkRead(item) },
                                         onToggleRead: { toggleRead(item.url) },
-                                        onDelete:     { delete(item.url) })
+                                        onDelete:     { delete(item.url) },
+                                        onNoteTap:    { notesItem = item })
                                 }
                             }
                             .listStyle(.plain)
@@ -119,6 +120,17 @@ struct ReadLaterView: View {
             .refreshable { refresh() }
             .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
                 SyncKeySettingsView()
+            }
+            .sheet(item: $notesItem) { item in
+                NotesEditorView(
+                    item: item,
+                    onSave: { newNotes in
+                        ReadLaterStore.shared.setNotes(url: item.url, notes: newNotes)
+                        items = ReadLaterStore.shared.visible()
+                        ReadLaterStore.shared.syncWithCloud()
+                    },
+                    onOpen: { openAndMarkRead(item) }
+                )
             }
         }
     }
@@ -159,6 +171,7 @@ struct ItemRow: View {
     let onTap: () -> Void
     let onToggleRead: () -> Void
     let onDelete: () -> Void
+    let onNoteTap: () -> Void
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     private var faviconSize: CGFloat { hSizeClass == .regular ? 36 : 28 }
@@ -182,11 +195,28 @@ struct ItemRow: View {
                     .font(hSizeClass == .regular ? .title3 : .body)
                     .foregroundColor(item.read ? .secondary : .primary)
                     .lineLimit(2)
-                Text(hostname)
-                    .font(hSizeClass == .regular ? .subheadline : .caption)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    Text(hostname)
+                        .font(hSizeClass == .regular ? .subheadline : .caption)
+                        .foregroundColor(.secondary)
+                    if let category = ArticleCategory.forURL(item.url) {
+                        Text(category.rawValue)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundColor(category.color)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(category.color.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+                }
             }
             Spacer()
+            Button(action: onNoteTap) {
+                Image(systemName: "note.text")
+                    .font(hSizeClass == .regular ? .title3 : .body)
+                    .foregroundColor(hasNotes ? .accentColor : .secondary.opacity(0.35))
+            }
+            .buttonStyle(.plain)
         }
         .padding(.vertical, hSizeClass == .regular ? 6 : 4)
         .opacity(item.read ? 0.55 : 1)
@@ -206,6 +236,8 @@ struct ItemRow: View {
         }
     }
 
+    private var hasNotes: Bool { !(item.notes ?? "").isEmpty }
+
     private var hostname: String {
         URL(string: item.url).flatMap { $0.host } ?? item.url
     }
@@ -222,11 +254,11 @@ struct ItemRow: View {
 
 struct SyncKeySettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
+    @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
     @State private var key: String = ReadLaterStore.shared.syncToken
     @State private var message: String?
 
-    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
     private let columns = Array(repeating: GridItem(.flexible()), count: 6)
 
     var body: some View {
@@ -274,6 +306,19 @@ struct SyncKeySettingsView: View {
                     }
                 }
 
+                Section {
+                    if let url = Self.exportURL(extension: "json", content: Self.jsonExport()) {
+                        ShareLink("Export as JSON", item: url)
+                    }
+                    if let url = Self.exportURL(extension: "csv", content: Self.csvExport()) {
+                        ShareLink("Export as CSV", item: url)
+                    }
+                } header: {
+                    Text("Export Data")
+                } footer: {
+                    Text("Save or share a copy of everything in your Read Later list, including notes.")
+                }
+
                 if let message {
                     Section { Text(message).foregroundColor(.secondary) }
                 }
@@ -307,5 +352,46 @@ struct SyncKeySettingsView: View {
         ReadLaterStore.shared.syncToken = trimmed
         ReadLaterStore.shared.syncWithCloud()
         dismiss()
+    }
+
+    private static func jsonExport() -> Data? {
+        try? JSONSerialization.data(withJSONObject: ReadLaterStore.shared.toJSONArray(), options: [.prettyPrinted])
+    }
+
+    private static func csvExport() -> Data? {
+        var rows = [["Title", "URL", "Saved", "Read", "Notes"]]
+        let formatter = ISO8601DateFormatter()
+        for item in ReadLaterStore.shared.visible() {
+            rows.append([
+                item.title,
+                item.url,
+                formatter.string(from: Date(timeIntervalSince1970: item.savedAt / 1000)),
+                item.read ? "Yes" : "No",
+                item.notes ?? "",
+            ])
+        }
+        let csv = rows.map { row in row.map(csvField).joined(separator: ",") }.joined(separator: "\n")
+        return csv.data(using: .utf8)
+    }
+
+    private static func csvField(_ value: String) -> String {
+        guard value.contains(",") || value.contains("\"") || value.contains("\n") else { return value }
+        return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+    }
+
+    // Writes export content to a temp file so ShareLink has something
+    // file-backed (with the right extension/filename) to share or save.
+    private static func exportURL(extension ext: String, content: Data?) -> URL? {
+        guard let content else { return nil }
+        let dateString = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ReadLater-\(dateString)")
+            .appendingPathExtension(ext)
+        do {
+            try content.write(to: url)
+            return url
+        } catch {
+            return nil
+        }
     }
 }

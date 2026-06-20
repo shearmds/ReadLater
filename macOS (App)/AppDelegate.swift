@@ -193,9 +193,9 @@ struct ReadLaterPopover: View {
 
     @State private var hoveredURL: String?
     @State private var launchAtLoginToggled: Bool = false
-    @AppStorage("appTheme") private var themeName: String = AppTheme.sunset.rawValue
+    @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
 
-    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .sunset }
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
     private var unreadItems: [ReadLaterItem] { items.filter { !$0.read } }
 
     var body: some View {

@@ -134,7 +134,7 @@ class ShareViewController: SLComposeServiceViewController {
     private func fetchTitle(from url: URL) {
         var request = URLRequest(url: url, timeoutInterval: 5)
                 request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", forHTTPHeaderField: "User-Agent")
-        
+
         URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
             guard let data,
                   let html = String(data: data, encoding: .utf8)

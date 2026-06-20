@@ -7,20 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4C63CD0A2FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CD092FD079910095DCAE /* ReadLater Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C63CD142FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CD132FD079910095DCAE /* ReadLater Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C63CDA42FD0A6D90095DCAE /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */; };
 		4C63CDBB2FD0C5C50095DCAE /* ReadLater Share.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4C6E4A182FE6CD1E00D1DC24 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6E4A172FE6CD1E00D1DC24 /* WidgetKit.framework */; };
+		4C6E4A1A2FE6CD1E00D1DC24 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6E4A192FE6CD1E00D1DC24 /* SwiftUI.framework */; };
+		4C6E4A252FE6CD1F00D1DC24 /* Read This Later WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4C63CD0B2FD079910095DCAE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4C63CCD02FD0798F0095DCAE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4C63CD082FD079910095DCAE;
-			remoteInfo = "ReadLater Extension (iOS)";
-		};
 		4C63CD152FD079910095DCAE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4C63CCD02FD0798F0095DCAE /* Project object */;
@@ -35,6 +30,13 @@
 			remoteGlobalIDString = 4C63CDB02FD0C5C50095DCAE;
 			remoteInfo = "ReadLater Share";
 		};
+		4C6E4A232FE6CD1F00D1DC24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4C63CCD02FD0798F0095DCAE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C6E4A152FE6CD1E00D1DC24;
+			remoteInfo = "Read This Later WidgetExtension";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -45,7 +47,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				4C63CDBB2FD0C5C50095DCAE /* ReadLater Share.appex in Embed Foundation Extensions */,
-				4C63CD0A2FD079910095DCAE /* ReadLater Extension.appex in Embed Foundation Extensions */,
+				4C6E4A252FE6CD1F00D1DC24 /* Read This Later WidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,12 +68,13 @@
 /* Begin PBXFileReference section */
 		4C63CCEC2FD079910095DCAE /* ReadLater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLater.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C63CCFE2FD079910095DCAE /* ReadLater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLater.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C63CD092FD079910095DCAE /* ReadLater Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C63CD132FD079910095DCAE /* ReadLater Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C63CD502FD087D80095DCAE /* ReadLater (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ReadLater (iOS).entitlements"; sourceTree = "<group>"; };
-		4C63CD512FD0881F0095DCAE /* ReadLater Extension (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ReadLater Extension (iOS).entitlements"; sourceTree = "<group>"; };
 		4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLater Share.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Read This Later WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C6E4A172FE6CD1E00D1DC24 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		4C6E4A192FE6CD1E00D1DC24 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -79,22 +82,16 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: Resources/Main.html",
+				AppTheme.swift,
+				ArticleCategory.swift,
 				Assets.xcassets,
 				ReadLaterStore.swift,
 				Resources/Icon.png,
 				Resources/Script.js,
 				Resources/Style.css,
 				SaveURLIntent.swift,
-				ViewController.swift,
 			);
 			target = 4C63CCEB2FD079910095DCAE /* ReadLater (iOS) */;
-		};
-		4C63CD3B2FD079910095DCAE /* Exceptions for "iOS (Extension)" folder in "ReadLater Extension (iOS)" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */;
 		};
 		4C63CD402FD079910095DCAE /* Exceptions for "iOS (App)" folder in "ReadLater (iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -107,12 +104,12 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: Resources/Main.html",
+				AppTheme.swift,
 				Assets.xcassets,
 				ReadLaterStore.swift,
 				Resources/Icon.png,
 				Resources/Script.js,
 				Resources/Style.css,
-				ViewController.swift,
 			);
 			target = 4C63CCFD2FD079910095DCAE /* ReadLater (macOS) */;
 		};
@@ -122,21 +119,6 @@
 				Info.plist,
 			);
 			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
-		};
-		4C63CD4A2FD079910095DCAE /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (iOS)" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Resources/_locales,
-				Resources/background.js,
-				Resources/content.js,
-				Resources/images,
-				Resources/manifest.json,
-				Resources/popup.css,
-				Resources/popup.html,
-				Resources/popup.js,
-				SafariWebExtensionHandler.swift,
-			);
-			target = 4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */;
 		};
 		4C63CD4B2FD079910095DCAE /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -152,14 +134,6 @@
 				SafariWebExtensionHandler.swift,
 			);
 			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
-		};
-		4C63CD552FD08AF10095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				ReadLaterStore.swift,
-				SaveURLIntent.swift,
-			);
-			target = 4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */;
 		};
 		4C63CDA62FD0A87F0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -182,6 +156,20 @@
 			);
 			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
 		};
+		4C6E4A292FE6CD1F00D1DC24 /* Exceptions for "Read This Later Widget" folder in "Read This Later WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */;
+		};
+		4C6E4A2B2FE6CE0100D1DC24 /* Exceptions for "Shared (App)" folder in "Read This Later WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ReadLaterStore.swift,
+			);
+			target = 4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -190,9 +178,9 @@
 			exceptions = (
 				4C63CD372FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (iOS)" target */,
 				4C63CD412FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (macOS)" target */,
-				4C63CD552FD08AF10095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */,
 				4C63CDA62FD0A87F0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Extension (macOS)" target */,
 				4C63CDC12FD0C5FD0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Share" target */,
+				4C6E4A2B2FE6CE0100D1DC24 /* Exceptions for "Shared (App)" folder in "Read This Later WidgetExtension" target */,
 			);
 			path = "Shared (App)";
 			sourceTree = "<group>";
@@ -200,7 +188,6 @@
 		4C63CCDD2FD079910095DCAE /* Shared (Extension) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				4C63CD4A2FD079910095DCAE /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (iOS)" target */,
 				4C63CD4B2FD079910095DCAE /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (macOS)" target */,
 			);
 			explicitFolders = (
@@ -223,14 +210,6 @@
 			path = "macOS (App)";
 			sourceTree = "<group>";
 		};
-		4C63CD0D2FD079910095DCAE /* iOS (Extension) */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4C63CD3B2FD079910095DCAE /* Exceptions for "iOS (Extension)" folder in "ReadLater Extension (iOS)" target */,
-			);
-			path = "iOS (Extension)";
-			sourceTree = "<group>";
-		};
 		4C63CD172FD079910095DCAE /* macOS (Extension) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -245,6 +224,14 @@
 				4C63CDBF2FD0C5C50095DCAE /* Exceptions for "ReadLater Share" folder in "ReadLater Share" target */,
 			);
 			path = "ReadLater Share";
+			sourceTree = "<group>";
+		};
+		4C6E4A1B2FE6CD1E00D1DC24 /* Read This Later Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C6E4A292FE6CD1F00D1DC24 /* Exceptions for "Read This Later Widget" folder in "Read This Later WidgetExtension" target */,
+			);
+			path = "Read This Later Widget";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -265,13 +252,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4C63CD062FD079910095DCAE /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4C63CD102FD079910095DCAE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -286,21 +266,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4C6E4A132FE6CD1E00D1DC24 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C6E4A1A2FE6CD1E00D1DC24 /* SwiftUI.framework in Frameworks */,
+				4C6E4A182FE6CD1E00D1DC24 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		4C63CCCF2FD0798F0095DCAE = {
 			isa = PBXGroup;
 			children = (
-				4C63CD512FD0881F0095DCAE /* ReadLater Extension (iOS).entitlements */,
 				4C63CD502FD087D80095DCAE /* ReadLater (iOS).entitlements */,
 				4C63CCD42FD0798F0095DCAE /* Shared (App) */,
 				4C63CCDD2FD079910095DCAE /* Shared (Extension) */,
 				4C63CCEE2FD079910095DCAE /* iOS (App) */,
 				4C63CCFF2FD079910095DCAE /* macOS (App) */,
-				4C63CD0D2FD079910095DCAE /* iOS (Extension) */,
 				4C63CD172FD079910095DCAE /* macOS (Extension) */,
 				4C63CDB22FD0C5C50095DCAE /* ReadLater Share */,
+				4C6E4A1B2FE6CD1E00D1DC24 /* Read This Later Widget */,
 				4C63CDA22FD0A6D90095DCAE /* Frameworks */,
 				4C63CCED2FD079910095DCAE /* Products */,
 			);
@@ -311,9 +299,9 @@
 			children = (
 				4C63CCEC2FD079910095DCAE /* ReadLater.app */,
 				4C63CCFE2FD079910095DCAE /* ReadLater.app */,
-				4C63CD092FD079910095DCAE /* ReadLater Extension.appex */,
 				4C63CD132FD079910095DCAE /* ReadLater Extension.appex */,
 				4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */,
+				4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -322,6 +310,8 @@
 			isa = PBXGroup;
 			children = (
 				4C63CDA32FD0A6D90095DCAE /* ServiceManagement.framework */,
+				4C6E4A172FE6CD1E00D1DC24 /* WidgetKit.framework */,
+				4C6E4A192FE6CD1E00D1DC24 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -341,8 +331,8 @@
 			buildRules = (
 			);
 			dependencies = (
-				4C63CD0C2FD079910095DCAE /* PBXTargetDependency */,
 				4C63CDBA2FD0C5C50095DCAE /* PBXTargetDependency */,
+				4C6E4A242FE6CD1F00D1DC24 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4C63CCEE2FD079910095DCAE /* iOS (App) */,
@@ -377,28 +367,6 @@
 			productName = "ReadLater (macOS)";
 			productReference = 4C63CCFE2FD079910095DCAE /* ReadLater.app */;
 			productType = "com.apple.product-type.application";
-		};
-		4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4C63CD382FD079910095DCAE /* Build configuration list for PBXNativeTarget "ReadLater Extension (iOS)" */;
-			buildPhases = (
-				4C63CD052FD079910095DCAE /* Sources */,
-				4C63CD062FD079910095DCAE /* Frameworks */,
-				4C63CD072FD079910095DCAE /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				4C63CD0D2FD079910095DCAE /* iOS (Extension) */,
-			);
-			name = "ReadLater Extension (iOS)";
-			packageProductDependencies = (
-			);
-			productName = "ReadLater Extension (iOS)";
-			productReference = 4C63CD092FD079910095DCAE /* ReadLater Extension.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */ = {
 			isa = PBXNativeTarget;
@@ -444,6 +412,28 @@
 			productReference = 4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C6E4A282FE6CD1F00D1DC24 /* Build configuration list for PBXNativeTarget "Read This Later WidgetExtension" */;
+			buildPhases = (
+				4C6E4A122FE6CD1E00D1DC24 /* Sources */,
+				4C6E4A132FE6CD1E00D1DC24 /* Frameworks */,
+				4C6E4A142FE6CD1E00D1DC24 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4C6E4A1B2FE6CD1E00D1DC24 /* Read This Later Widget */,
+			);
+			name = "Read This Later WidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Read This Later WidgetExtension";
+			productReference = 4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -460,13 +450,13 @@
 					4C63CCFD2FD079910095DCAE = {
 						CreatedOnToolsVersion = 26.5;
 					};
-					4C63CD082FD079910095DCAE = {
-						CreatedOnToolsVersion = 26.5;
-					};
 					4C63CD122FD079910095DCAE = {
 						CreatedOnToolsVersion = 26.5;
 					};
 					4C63CDB02FD0C5C50095DCAE = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					4C6E4A152FE6CD1E00D1DC24 = {
 						CreatedOnToolsVersion = 26.5;
 					};
 				};
@@ -487,9 +477,9 @@
 			targets = (
 				4C63CCEB2FD079910095DCAE /* ReadLater (iOS) */,
 				4C63CCFD2FD079910095DCAE /* ReadLater (macOS) */,
-				4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */,
 				4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */,
 				4C63CDB02FD0C5C50095DCAE /* ReadLater Share */,
+				4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -509,13 +499,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4C63CD072FD079910095DCAE /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4C63CD112FD079910095DCAE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -524,6 +507,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4C63CDAF2FD0C5C50095DCAE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C6E4A142FE6CD1E00D1DC24 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -547,13 +537,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4C63CD052FD079910095DCAE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4C63CD0F2FD079910095DCAE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -568,14 +551,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4C6E4A122FE6CD1E00D1DC24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4C63CD0C2FD079910095DCAE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4C63CD082FD079910095DCAE /* ReadLater Extension (iOS) */;
-			targetProxy = 4C63CD0B2FD079910095DCAE /* PBXContainerItemProxy */;
-		};
 		4C63CD162FD079910095DCAE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4C63CD122FD079910095DCAE /* ReadLater Extension (macOS) */;
@@ -586,92 +571,27 @@
 			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
 			targetProxy = 4C63CDB92FD0C5C50095DCAE /* PBXContainerItemProxy */;
 		};
+		4C6E4A242FE6CD1F00D1DC24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */;
+			targetProxy = 4C6E4A232FE6CD1F00D1DC24 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		4C63CD392FD079910095DCAE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
-				DEVELOPMENT_TEAM = 95E9CZ9HW6;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater Extension";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Extension;
-				PRODUCT_NAME = "ReadLater Extension";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		4C63CD3A2FD079910095DCAE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
-				DEVELOPMENT_TEAM = 95E9CZ9HW6;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater Extension";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Extension;
-				PRODUCT_NAME = "ReadLater Extension";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		4C63CD3E2FD079910095DCAE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = ReadLater;
+				INFOPLIST_KEY_CFBundleDisplayName = "RTL: Research Sync";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -707,13 +627,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = ReadLater;
+				INFOPLIST_KEY_CFBundleDisplayName = "RTL: Research Sync";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -1024,7 +945,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ReadLater Share/Info.plist";
@@ -1055,7 +976,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ReadLater Share/Info.plist";
@@ -1082,6 +1003,73 @@
 			};
 			name = Release;
 		};
+		4C6E4A262FE6CD1F00D1DC24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Read This Later Widget/Read This Later Widget.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_TEAM = 95E9CZ9HW6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Read This Later Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Read This Later: Research Sync";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4C6E4A272FE6CD1F00D1DC24 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Read This Later Widget/Read This Later Widget.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_TEAM = 95E9CZ9HW6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Read This Later Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Read This Later: Research Sync";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1090,15 +1078,6 @@
 			buildConfigurations = (
 				4C63CD4C2FD079910095DCAE /* Debug */,
 				4C63CD4D2FD079910095DCAE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4C63CD382FD079910095DCAE /* Build configuration list for PBXNativeTarget "ReadLater Extension (iOS)" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4C63CD392FD079910095DCAE /* Debug */,
-				4C63CD3A2FD079910095DCAE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1135,6 +1114,15 @@
 			buildConfigurations = (
 				4C63CDBD2FD0C5C50095DCAE /* Debug */,
 				4C63CDBE2FD0C5C50095DCAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C6E4A282FE6CD1F00D1DC24 /* Build configuration list for PBXNativeTarget "Read This Later WidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C6E4A262FE6CD1F00D1DC24 /* Debug */,
+				4C6E4A272FE6CD1F00D1DC24 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

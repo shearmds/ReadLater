@@ -1,4 +1,6 @@
 import Foundation
+import WidgetKit
+import UserNotifications
 
 struct ReadLaterItem: Codable {
     var url: String
@@ -7,9 +9,10 @@ struct ReadLaterItem: Codable {
     var read: Bool
     var updatedAt: Double
     var deleted: Bool
+    var notes: String?
 
     enum CodingKeys: String, CodingKey {
-        case url, title, savedAt, read, updatedAt, deleted
+        case url, title, savedAt, read, updatedAt, deleted, notes
     }
 
     init(url: String, title: String, savedAt: Double? = nil, read: Bool = false) {
@@ -20,6 +23,7 @@ struct ReadLaterItem: Codable {
         self.read = read
         self.updatedAt = savedAt ?? now
         self.deleted = false
+        self.notes = nil
     }
 
     init?(jsonDict dict: [String: Any]) {
@@ -31,6 +35,7 @@ struct ReadLaterItem: Codable {
         self.read = dict["read"] as? Bool ?? false
         self.updatedAt = dict["updatedAt"] as? Double ?? self.savedAt
         self.deleted = dict["deleted"] as? Bool ?? false
+        self.notes = dict["notes"] as? String
     }
 
     init(from decoder: Decoder) throws {
@@ -41,11 +46,18 @@ struct ReadLaterItem: Codable {
         read = try c.decode(Bool.self, forKey: .read)
         updatedAt = try c.decode(Double.self, forKey: .updatedAt)
         deleted = try c.decodeIfPresent(Bool.self, forKey: .deleted) ?? false
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
     }
 
     func toDict() -> [String: Any] {
-        ["url": url, "title": title, "savedAt": savedAt, "read": read, "updatedAt": updatedAt, "deleted": deleted]
+        var dict: [String: Any] = ["url": url, "title": title, "savedAt": savedAt, "read": read, "updatedAt": updatedAt, "deleted": deleted]
+        if let notes { dict["notes"] = notes }
+        return dict
     }
+}
+
+extension ReadLaterItem: Identifiable {
+    var id: String { url }
 }
 
 private nonisolated struct SyncPayload: Codable {
@@ -97,6 +109,73 @@ class ReadLaterStore {
     func save(_ items: [ReadLaterItem]) {
         guard let data = try? JSONEncoder().encode(items) else { return }
         UserDefaults(suiteName: appGroupSuite)?.set(data, forKey: storeKey)
+        // The macOS Safari extension target's deployment target predates WidgetKit.
+        if #available(iOS 14.0, macOS 11.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        reconcileStaleReminders(items)
+    }
+
+    // How long an unread item sits before we nudge about it.
+    private static let staleThresholdMillis: Double = 14 * 24 * 60 * 60 * 1000
+
+    // Keeps scheduled local notifications in sync with the current item list:
+    // cancels reminders for items that are now read/deleted, and schedules
+    // one for any unread item that doesn't have a pending reminder yet. Runs
+    // after every save() so it applies uniformly across add/delete/markRead/
+    // toggleRead/merge, including changes pulled in from other devices.
+    //
+    // Permission is requested here, lazily, rather than at app launch — the
+    // first time there's actually something to remind about (i.e. the first
+    // save), not before the user has done anything.
+    private func reconcileStaleReminders(_ items: [ReadLaterItem]) {
+        let center = UNUserNotificationCenter.current()
+        let activeUnread = items.filter { !$0.deleted && !$0.read }
+
+        center.getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized, .provisional:
+                self.scheduleReminders(activeUnread, center: center)
+            case .notDetermined where !activeUnread.isEmpty:
+                center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                    guard granted else { return }
+                    self.scheduleReminders(activeUnread, center: center)
+                }
+            default:
+                break // denied, restricted, or nothing to remind about yet
+            }
+        }
+    }
+
+    private func scheduleReminders(_ activeUnread: [ReadLaterItem], center: UNUserNotificationCenter) {
+        let activeIDs = Set(activeUnread.map { "stale-" + $0.url })
+
+        center.getPendingNotificationRequests { pending in
+            let pendingStaleIDs = Set(pending.map { $0.identifier }.filter { $0.hasPrefix("stale-") })
+            let toCancel = pendingStaleIDs.subtracting(activeIDs)
+            if !toCancel.isEmpty {
+                center.removePendingNotificationRequests(withIdentifiers: Array(toCancel))
+            }
+
+            for item in activeUnread {
+                let id = "stale-" + item.url
+                guard !pendingStaleIDs.contains(id) else { continue }
+                let fireDate = Date(timeIntervalSince1970: item.savedAt / 1000 + Self.staleThresholdMillis / 1000)
+                let interval = fireDate.timeIntervalSinceNow
+                // Skip items already past the threshold (e.g. existing items
+                // when this feature first ships) rather than firing immediately.
+                guard interval > 60 else { continue }
+
+                let content = UNMutableNotificationContent()
+                content.title = "Still want to read this?"
+                content.body = item.title
+                content.sound = .default
+                content.userInfo = ["url": item.url]
+
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+                center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
+            }
+        }
     }
 
     func add(url: String, title: String) {
@@ -128,6 +207,26 @@ class ReadLaterStore {
     // Items not marked as deleted, for display.
     func visible() -> [ReadLaterItem] {
         load().filter { !$0.deleted }
+    }
+
+    // Idempotent mark-as-read, used when opening an item from outside the
+    // list UI (e.g. tapping the widget), where toggleRead's flip-flop
+    // behavior would be wrong if the item were already read.
+    func markRead(url: String) {
+        var items = load()
+        if let i = items.firstIndex(where: { $0.url == url }), !items[i].read {
+            items[i].read = true
+            items[i].updatedAt = Date().timeIntervalSince1970 * 1000
+            save(items)
+        }
+    }
+
+    func setNotes(url: String, notes: String) {
+        var items = load()
+        guard let i = items.firstIndex(where: { $0.url == url }) else { return }
+        items[i].notes = notes.isEmpty ? nil : notes
+        items[i].updatedAt = Date().timeIntervalSince1970 * 1000
+        save(items)
     }
 
     func toggleRead(url: String) {
