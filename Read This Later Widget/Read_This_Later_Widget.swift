@@ -107,6 +107,7 @@ struct Read_This_Later_Widget: Widget {
     }
 }
 
+@available(iOS 17.0, *)
 #Preview(as: .systemMedium) {
     Read_This_Later_Widget()
 } timeline: {
