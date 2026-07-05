@@ -1,7 +1,2 @@
-browser.runtime.sendMessage({ greeting: "hello" }).then((response) => {
-    console.log("Received response: ", response);
-});
-
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("Received request: ", request);
-});
+// No content script needed — the popup reads the active tab's URL via
+// browser.tabs.query and hands it to the native handler. Intentionally empty.
