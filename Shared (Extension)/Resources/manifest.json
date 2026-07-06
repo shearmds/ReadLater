@@ -28,5 +28,7 @@
         "default_title": "Save to RTL"
     },
 
-    "permissions": [ "activeTab", "tabs", "nativeMessaging" ]
+    "permissions": [ "activeTab", "tabs", "nativeMessaging", "scripting" ],
+
+    "host_permissions": [ "https://readlater-sync.shearm.workers.dev/*" ]
 }

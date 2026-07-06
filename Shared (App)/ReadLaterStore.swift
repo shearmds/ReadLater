@@ -2,6 +2,17 @@ import Foundation
 import WidgetKit
 import UserNotifications
 
+// Offline-reading availability for an item's article body. Rides the existing
+// /sync list (tiny), so every device learns availability. The body itself is
+// NOT synced through the list — it's E2E-encrypted and stored separately via
+// the Worker's /body endpoints (or cached locally on the capturing device).
+enum OfflineStatus: String, Codable {
+    case none         // no offline copy, none requested
+    case requested    // capture in flight
+    case saved        // body available (uploaded / cached)
+    case unavailable  // capture failed (e.g. paywalled stub) — don't retry silently
+}
+
 struct ReadLaterItem: Codable {
     var url: String
     var title: String
@@ -10,9 +21,10 @@ struct ReadLaterItem: Codable {
     var updatedAt: Double
     var deleted: Bool
     var notes: String?
+    var offline: OfflineStatus
 
     enum CodingKeys: String, CodingKey {
-        case url, title, savedAt, read, updatedAt, deleted, notes
+        case url, title, savedAt, read, updatedAt, deleted, notes, offline
     }
 
     init(url: String, title: String, savedAt: Double? = nil, read: Bool = false) {
@@ -24,6 +36,7 @@ struct ReadLaterItem: Codable {
         self.updatedAt = savedAt ?? now
         self.deleted = false
         self.notes = nil
+        self.offline = .none
     }
 
     init?(jsonDict dict: [String: Any]) {
@@ -36,6 +49,7 @@ struct ReadLaterItem: Codable {
         self.updatedAt = dict["updatedAt"] as? Double ?? self.savedAt
         self.deleted = dict["deleted"] as? Bool ?? false
         self.notes = dict["notes"] as? String
+        self.offline = (dict["offline"] as? String).flatMap(OfflineStatus.init(rawValue:)) ?? .none
     }
 
     init(from decoder: Decoder) throws {
@@ -47,11 +61,18 @@ struct ReadLaterItem: Codable {
         updatedAt = try c.decode(Double.self, forKey: .updatedAt)
         deleted = try c.decodeIfPresent(Bool.self, forKey: .deleted) ?? false
         notes = try c.decodeIfPresent(String.self, forKey: .notes)
+        // Decode defensively: tolerate a missing field (older data) and an
+        // unknown future status string without throwing.
+        offline = (try c.decodeIfPresent(String.self, forKey: .offline))
+            .flatMap(OfflineStatus.init(rawValue:)) ?? .none
     }
 
     func toDict() -> [String: Any] {
         var dict: [String: Any] = ["url": url, "title": title, "savedAt": savedAt, "read": read, "updatedAt": updatedAt, "deleted": deleted]
         if let notes { dict["notes"] = notes }
+        // Omit when .none so existing items serialize byte-identically (no
+        // spurious churn on the Worker's change comparison), matching notes.
+        if offline != .none { dict["offline"] = offline.rawValue }
         return dict
     }
 }
@@ -235,6 +256,17 @@ class ReadLaterStore {
             items[i].read = !items[i].read
             items[i].updatedAt = Date().timeIntervalSince1970 * 1000
         }
+        save(items)
+    }
+
+    // Sets an item's offline-availability status (set by a capturing client,
+    // e.g. the Safari extension after it uploads an encrypted body). Bumps
+    // updatedAt so the change wins the merge and propagates to other devices.
+    func setOffline(url: String, status: String) {
+        var items = load()
+        guard let i = items.firstIndex(where: { $0.url == url }) else { return }
+        items[i].offline = OfflineStatus(rawValue: status) ?? .none
+        items[i].updatedAt = Date().timeIntervalSince1970 * 1000
         save(items)
     }
 

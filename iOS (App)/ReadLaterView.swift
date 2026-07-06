@@ -6,6 +6,7 @@ struct ReadLaterView: View {
     @State private var searchText = ""
     @State private var showSettings = false
     @State private var notesItem: ReadLaterItem?
+    @State private var readerItem: ReadLaterItem?
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -103,7 +104,8 @@ struct ReadLaterView: View {
                                         onTap:        { openAndMarkRead(item) },
                                         onToggleRead: { toggleRead(item.url) },
                                         onDelete:     { delete(item.url) },
-                                        onNoteTap:    { notesItem = item })
+                                        onNoteTap:    { notesItem = item },
+                                        onOfflineRead: { readerItem = item })
                                 }
                             }
                             .listStyle(.plain)
@@ -132,13 +134,22 @@ struct ReadLaterView: View {
                     onOpen: { openAndMarkRead(item) }
                 )
             }
+            .sheet(item: $readerItem) { item in
+                OfflineReaderView(item: item)
+            }
         }
     }
 
     private func refresh() {
         items = ReadLaterStore.shared.visible()
         ReadLaterStore.shared.syncWithCloud { _ in
-            DispatchQueue.main.async { items = ReadLaterStore.shared.visible() }
+            DispatchQueue.main.async {
+                let latest = ReadLaterStore.shared.visible()
+                items = latest
+                // Pre-download bodies for newly-saved items so they're
+                // readable offline later (while we still have a connection).
+                OfflineBodyStore.shared.prefetchMissing(latest)
+            }
         }
     }
 
@@ -172,6 +183,7 @@ struct ItemRow: View {
     let onToggleRead: () -> Void
     let onDelete: () -> Void
     let onNoteTap: () -> Void
+    let onOfflineRead: () -> Void
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     private var faviconSize: CGFloat { hSizeClass == .regular ? 36 : 28 }
@@ -211,6 +223,7 @@ struct ItemRow: View {
                 }
             }
             Spacer()
+            offlineIndicator
             Button(action: onNoteTap) {
                 Image(systemName: "note.text")
                     .font(hSizeClass == .regular ? .title3 : .body)
@@ -233,6 +246,37 @@ struct ItemRow: View {
                       systemImage: item.read ? "envelope.badge" : "checkmark")
             }
             .tint(item.read ? .orange : .green)
+        }
+    }
+
+    private var iconFont: Font { hSizeClass == .regular ? .title3 : .body }
+
+    // Mirrors the browser extension's per-item offline badge:
+    // saved = tappable book, requested = spinner, unavailable = muted closed
+    // book (informational — capture happens on a browser/Safari surface, so
+    // there's nothing to retry from the app), none = nothing.
+    @ViewBuilder
+    private var offlineIndicator: some View {
+        switch item.offline {
+        case .saved:
+            Button(action: onOfflineRead) {
+                Image(systemName: "book")
+                    .font(iconFont)
+                    .foregroundColor(.accentColor)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Read offline")
+        case .requested:
+            ProgressView()
+                .controlSize(.small)
+                .accessibilityLabel("Saving for offline")
+        case .unavailable:
+            Image(systemName: "book.closed")
+                .font(iconFont)
+                .foregroundColor(.secondary.opacity(0.35))
+                .accessibilityLabel("Offline not available")
+        case .none:
+            EmptyView()
         }
     }
 

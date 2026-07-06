@@ -66,7 +66,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4C63CD372FD079910095DCAE = {
+		4C63CD372FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: Resources/Main.html",
@@ -81,42 +81,42 @@
 			);
 			target = 4C63CCEB2FD079910095DCAE /* ReadLater (iOS) */;
 		};
-		4C63CD402FD079910095DCAE = {
+		4C63CD402FD079910095DCAE /* Exceptions for "iOS (App)" folder in "ReadLater (iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4C63CCEB2FD079910095DCAE /* ReadLater (iOS) */;
 		};
-		4C63CDBF2FD0C5C50095DCAE = {
+		4C63CDBF2FD0C5C50095DCAE /* Exceptions for "ReadLater Share" folder in "ReadLater Share" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
 		};
-		4C63CDC12FD0C5FD0095DCAE = {
+		4C63CDC12FD0C5FD0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Share" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				ReadLaterStore.swift,
 			);
 			target = 4C63CDB02FD0C5C50095DCAE /* ReadLater Share */;
 		};
-		4C6E4A292FE6CD1F00D1DC24 = {
+		4C6E4A292FE6CD1F00D1DC24 /* Exceptions for "Read This Later Widget" folder in "Read This Later WidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */;
 		};
-		4C6E4A2B2FE6CE0100D1DC24 = {
+		4C6E4A2B2FE6CE0100D1DC24 /* Exceptions for "Shared (App)" folder in "Read This Later WidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				ReadLaterStore.swift,
 			);
 			target = 4C6E4A152FE6CD1E00D1DC24 /* Read This Later WidgetExtension */;
 		};
-		79DDE1692FFB0D2800F6A6BA = {
+		79DDE1692FFB0D2800F6A6BA /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Resources/_locales,
@@ -131,7 +131,7 @@
 			);
 			target = 79DDE15A2FFB0AA300F6A6BA /* ReadLater Extension (iOS) */;
 		};
-		79DDE16B2FFB0D8700F6A6BA = {
+		79DDE16B2FFB0D8700F6A6BA /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				ReadLaterStore.swift,
@@ -141,11 +141,53 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4C63CCD42FD0798F0095DCAE /* Shared (App) */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4C63CD372FD079910095DCAE, 4C63CDC12FD0C5FD0095DCAE, 4C6E4A2B2FE6CE0100D1DC24, 79DDE16B2FFB0D8700F6A6BA, ); path = "Shared (App)"; sourceTree = "<group>"; };
-		4C63CCDD2FD079910095DCAE /* Shared (Extension) */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (79DDE1692FFB0D2800F6A6BA, ); explicitFolders = (Resources/_locales, Resources/images, ); path = "Shared (Extension)"; sourceTree = "<group>"; };
-		4C63CCEE2FD079910095DCAE /* iOS (App) */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4C63CD402FD079910095DCAE, ); path = "iOS (App)"; sourceTree = "<group>"; };
-		4C63CDB22FD0C5C50095DCAE /* ReadLater Share */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4C63CDBF2FD0C5C50095DCAE, ); path = "ReadLater Share"; sourceTree = "<group>"; };
-		4C6E4A1B2FE6CD1E00D1DC24 /* Read This Later Widget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4C6E4A292FE6CD1F00D1DC24, ); path = "Read This Later Widget"; sourceTree = "<group>"; };
+		4C63CCD42FD0798F0095DCAE /* Shared (App) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C63CD372FD079910095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater (iOS)" target */,
+				4C63CDC12FD0C5FD0095DCAE /* Exceptions for "Shared (App)" folder in "ReadLater Share" target */,
+				4C6E4A2B2FE6CE0100D1DC24 /* Exceptions for "Shared (App)" folder in "Read This Later WidgetExtension" target */,
+				79DDE16B2FFB0D8700F6A6BA /* Exceptions for "Shared (App)" folder in "ReadLater Extension (iOS)" target */,
+			);
+			path = "Shared (App)";
+			sourceTree = "<group>";
+		};
+		4C63CCDD2FD079910095DCAE /* Shared (Extension) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				79DDE1692FFB0D2800F6A6BA /* Exceptions for "Shared (Extension)" folder in "ReadLater Extension (iOS)" target */,
+			);
+			explicitFolders = (
+				Resources/_locales,
+				Resources/images,
+			);
+			path = "Shared (Extension)";
+			sourceTree = "<group>";
+		};
+		4C63CCEE2FD079910095DCAE /* iOS (App) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C63CD402FD079910095DCAE /* Exceptions for "iOS (App)" folder in "ReadLater (iOS)" target */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		4C63CDB22FD0C5C50095DCAE /* ReadLater Share */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C63CDBF2FD0C5C50095DCAE /* Exceptions for "ReadLater Share" folder in "ReadLater Share" target */,
+			);
+			path = "ReadLater Share";
+			sourceTree = "<group>";
+		};
+		4C6E4A1B2FE6CD1E00D1DC24 /* Read This Later Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4C6E4A292FE6CD1F00D1DC24 /* Exceptions for "Read This Later Widget" folder in "Read This Later WidgetExtension" target */,
+			);
+			path = "Read This Later Widget";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -330,7 +372,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4C63CCD32FD0798F0095DCAE /* Build configuration list for PBXProject "ReadLater (iOS)" */;
+			buildConfigurationList = 4C63CCD32FD0798F0095DCAE /* Build configuration list for PBXProject "ReadLater" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -843,7 +885,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4C63CCD32FD0798F0095DCAE /* Build configuration list for PBXProject "ReadLater (iOS)" */ = {
+		4C63CCD32FD0798F0095DCAE /* Build configuration list for PBXProject "ReadLater" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C63CD4C2FD079910095DCAE /* Debug */,
