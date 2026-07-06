@@ -59,20 +59,6 @@ main {
 #save-btn:disabled { opacity: 0.6; cursor: default; }
 #save-btn.saved { background: #34c759; }
 
-/* Same shape/size as the save button, distinct color (indigo) so the offline
-   action reads as secondary but equally tappable. */
-#save-offline-btn {
-  padding: 12px 14px;
-  background: #5856d6;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-#save-offline-btn:disabled { opacity: 0.6; cursor: default; }
-
 #status {
   font-size: 12px;
   color: #8e8e93;

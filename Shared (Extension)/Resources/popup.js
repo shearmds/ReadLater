@@ -3,7 +3,6 @@
 // (via background.js) which writes to the shared App Group store.
 
 const saveBtn = document.getElementById("save-btn");
-const saveOfflineBtn = document.getElementById("save-offline-btn");
 const statusEl = document.getElementById("status");
 const titleEl = document.getElementById("page-title");
 
@@ -25,12 +24,17 @@ async function init() {
 
     titleEl.textContent = tab.title || tab.url;
 
-    // If it's already saved, reflect that instead of offering a duplicate save.
+    // Reflect current state: already saved with an offline copy, already saved
+    // without one (offer to add it — the page is right here), or fresh.
     try {
         const res = await browser.runtime.sendMessage({ action: "getItems" });
         const items = res?.items ?? [];
-        if (items.some((i) => i.url === tab.url && !i.deleted)) {
-            markSaved("Already in your list.");
+        const existing = items.find((i) => i.url === tab.url && !i.deleted);
+        if (existing?.offline === "saved") {
+            markSaved("Already saved for offline.");
+        } else if (existing) {
+            saveBtn.textContent = "Save offline copy";
+            statusEl.textContent = "In your list — no offline copy yet.";
         }
     } catch {
         // getItems is best-effort; saving still works.
@@ -44,72 +48,56 @@ function markSaved(text) {
     statusEl.textContent = text ?? "";
 }
 
+// One save action: store the link immediately (instant, always succeeds), then
+// grab an offline copy in the same flow. On iPhone the extension is the only
+// strong-capture moment — you can't add an offline copy later from the app — so
+// every save attempts offline automatically. If the page can't be extracted the
+// link is still saved, just flagged "offline unavailable".
 saveBtn.addEventListener("click", async () => {
     if (!currentTab?.url) return;
     saveBtn.disabled = true;
     saveBtn.textContent = "Saving…";
     statusEl.textContent = "";
 
+    // 1) Save the link — the part that must not fail.
     try {
-        const res = await browser.runtime.sendMessage({
+        const res = await sendNative({
             action: "saveItem",
             url: currentTab.url,
             title: currentTab.title || currentTab.url,
         });
         if (res?.error) throw new Error(res.error);
-        markSaved("Saved to RTL.");
     } catch {
         saveBtn.disabled = false;
         saveBtn.textContent = "+ Save this page";
         statusEl.textContent = "Couldn't save — try again.";
+        return;
     }
-});
+    markSaved("Saved.");
 
-// --- Offline capture --------------------------------------------------------
-// Strong capture on iPhone: inject the extractor into the live page, sanitize,
-// encrypt with a key derived from the sync token, upload the ciphertext to the
-// Worker, and flag the item offline:"saved" so the app pulls + caches it.
-
-saveOfflineBtn.addEventListener("click", async () => {
-    if (!currentTab?.url) return;
-    setBusy("Reading page…");
-
+    // 2) Grab the offline copy (best-effort; the link is already saved). Keep
+    //    the popup open until this finishes — dismissing it early cancels the
+    //    capture, and on iOS there's no way to add it later from the app.
+    statusEl.textContent = "Adding offline copy…";
     try {
         const article = await extractCurrentPage();
         if (!article.ok || (article.length || 0) < OFFLINE_MIN_LENGTH) {
-            // Save the link anyway; just mark the body unavailable offline.
-            await sendNative({ action: "saveItem", url: currentTab.url, title: currentTab.title || currentTab.url });
             await sendNative({ action: "setOffline", url: currentTab.url, status: "unavailable" });
-            markSaved("Saved — but this page can’t be read offline.");
+            statusEl.textContent = "Saved — this page can’t be read offline.";
             return;
         }
-
-        setBusy("Saving offline…");
-        // Create/refresh the item first so setOffline has something to flag.
-        await sendNative({ action: "saveItem", url: currentTab.url, title: article.title || currentTab.title || currentTab.url });
-
         const { token } = await sendNative({ action: "getToken" });
         if (!token) throw new Error("no token");
-
         const wire = await encryptEnvelope(currentTab.url, article, token);
-        const ok = await uploadBody(currentTab.url, wire, token);
-        if (!ok) throw new Error("upload failed");
-
+        if (!(await uploadBody(currentTab.url, wire, token))) throw new Error("upload failed");
         await sendNative({ action: "setOffline", url: currentTab.url, status: "saved" });
-        markSaved("Saved & available offline.");
-    } catch (e) {
-        saveOfflineBtn.disabled = false;
-        saveBtn.disabled = false;
-        statusEl.textContent = "Couldn’t save offline — try again.";
+        statusEl.textContent = "✓ Saved & available offline.";
+    } catch {
+        // Link is saved; the offline copy didn't complete. No background retry
+        // on iOS, so invite another save to try again.
+        statusEl.textContent = "Saved — reopen and save again to add offline.";
     }
 });
-
-function setBusy(text) {
-    saveBtn.disabled = true;
-    saveOfflineBtn.disabled = true;
-    saveOfflineBtn.textContent = "…";
-    statusEl.textContent = text;
-}
 
 function sendNative(message) {
     return browser.runtime.sendMessage(message);
