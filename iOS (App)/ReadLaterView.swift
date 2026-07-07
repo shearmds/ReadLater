@@ -50,7 +50,7 @@ struct ReadLaterView: View {
 
                         VStack(spacing: 12) {
                             HStack {
-                                Text("RTL: Research Sync")
+                                Text("Research Sync")
                                     .font(titleFont)
                                     .foregroundColor(.white)
                                     .lineLimit(1)
