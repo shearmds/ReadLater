@@ -44,6 +44,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 return ["error": "missing url or title"]
             }
             store.add(url: url, title: title)
+            store.syncWithCloud()
             return ["items": store.toJSON()]
 
         case "deleteItem":
@@ -51,6 +52,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 return ["error": "missing url"]
             }
             store.delete(url: url)
+            store.syncWithCloud()
             return ["items": store.toJSON()]
 
         case "toggleRead":
@@ -58,6 +60,21 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 return ["error": "missing url"]
             }
             store.toggleRead(url: url)
+            store.syncWithCloud()
+            return ["items": store.toJSON()]
+
+        case "getToken":
+            // The popup needs the sync token to derive the offline-body
+            // encryption key. Same trust boundary — it's the user's own token.
+            return ["token": store.syncToken]
+
+        case "setOffline":
+            guard let url = msg["url"] as? String,
+                  let status = msg["status"] as? String else {
+                return ["error": "missing url or status"]
+            }
+            store.setOffline(url: url, status: status)
+            store.syncWithCloud()
             return ["items": store.toJSON()]
 
         default:

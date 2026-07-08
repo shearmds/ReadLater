@@ -1,181 +1,182 @@
-let allItems = [];
-let currentFilter = "all";
-let searchQuery = "";
+// Slim, save-only popup. The full list/search/read UI lives in the native RTL
+// app; here we just capture the current tab and hand it to the native handler
+// (via background.js) which writes to the shared App Group store.
 
-const listEl = document.getElementById("list");
-const emptyEl = document.getElementById("empty");
-const searchEl = document.getElementById("search");
 const saveBtn = document.getElementById("save-btn");
+const statusEl = document.getElementById("status");
+const titleEl = document.getElementById("page-title");
 
-async function load() {
-    const response = await browser.runtime.sendMessage({ action: "getItems" });
-    allItems = response?.items ?? [];
-    render();
-}
+const WORKER_URL = "https://readlater-sync.shearm.workers.dev";
+const OFFLINE_MIN_LENGTH = 1500; // below this = paywalled stub / not a real article
+const OFFLINE_PAYLOAD_VERSION = 1;
 
-function filtered() {
-    return allItems.filter((item) => {
-        if (currentFilter === "unread" && item.read) return false;
-        if (currentFilter === "read" && !item.read) return false;
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            return item.title.toLowerCase().includes(q) || item.url.toLowerCase().includes(q);
-        }
-        return true;
-    });
-}
+let currentTab = null;
 
-function faviconUrl(url) {
-    try {
-        const origin = new URL(url).origin;
-        return `${origin}/favicon.ico`;
-    } catch {
-        return "";
-    }
-}
+async function init() {
+    const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+    currentTab = tab;
 
-function render() {
-    const items = filtered();
-    listEl.innerHTML = "";
-
-    if (items.length === 0) {
-        emptyEl.classList.add("visible");
+    if (!tab?.url || tab.url.startsWith("about:") || tab.url.startsWith("safari-web-extension:")) {
+        titleEl.textContent = "No page to save.";
+        saveBtn.disabled = true;
         return;
     }
-    emptyEl.classList.remove("visible");
 
-    for (const item of items) {
-        const li = document.createElement("li");
-        li.className = "item" + (item.read ? " is-read" : "");
+    titleEl.textContent = tab.title || tab.url;
 
-        const favicon = document.createElement("img");
-        favicon.className = "item-favicon";
-        favicon.src = faviconUrl(item.url);
-        favicon.onerror = () => { favicon.style.visibility = "hidden"; };
-
-        const body = document.createElement("div");
-        body.className = "item-body";
-
-        const title = document.createElement("div");
-        title.className = "item-title";
-        title.textContent = item.title;
-
-        const urlEl = document.createElement("div");
-        urlEl.className = "item-url";
-        try { urlEl.textContent = new URL(item.url).hostname; } catch { urlEl.textContent = item.url; }
-
-        body.append(title, urlEl);
-
-        const actions = document.createElement("div");
-        actions.className = "item-actions";
-
-        const readBtn = document.createElement("button");
-        readBtn.title = item.read ? "Mark unread" : "Mark read";
-        readBtn.textContent = item.read ? "↩" : "✓";
-        readBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleRead(item.url); });
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.title = "Remove";
-        deleteBtn.textContent = "✕";
-        deleteBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteItem(item.url); });
-
-        actions.append(readBtn, deleteBtn);
-        li.append(favicon, body, actions);
-
-        li.addEventListener("click", () => {
-            browser.tabs.create({ url: item.url });
-            if (!item.read) toggleRead(item.url);
-        });
-
-        listEl.appendChild(li);
+    // Reflect current state: already saved with an offline copy, already saved
+    // without one (offer to add it — the page is right here), or fresh.
+    try {
+        const res = await browser.runtime.sendMessage({ action: "getItems" });
+        const items = res?.items ?? [];
+        const existing = items.find((i) => i.url === tab.url && !i.deleted);
+        if (existing?.offline === "saved") {
+            markSaved("Already saved for offline.");
+        } else if (existing) {
+            saveBtn.textContent = "Save offline copy";
+            statusEl.textContent = "In your list — no offline copy yet.";
+        }
+    } catch {
+        // getItems is best-effort; saving still works.
     }
 }
 
-async function save() {
-    const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-    if (!tab?.url || tab.url.startsWith("about:")) return;
-
-    const response = await browser.runtime.sendMessage({ action: "saveItem", url: tab.url, title: tab.title || tab.url });
-    allItems = response?.items ?? allItems;
-
-    saveBtn.textContent = "Saved!";
+function markSaved(text) {
+    saveBtn.textContent = "✓ Saved";
     saveBtn.classList.add("saved");
-    setTimeout(() => { saveBtn.textContent = "+ Save"; saveBtn.classList.remove("saved"); }, 1500);
-    render();
+    saveBtn.disabled = true;
+    statusEl.textContent = text ?? "";
 }
 
-async function toggleRead(url) {
-    const response = await browser.runtime.sendMessage({ action: "toggleRead", url });
-    allItems = response?.items ?? allItems;
-    render();
-}
+// One save action: store the link immediately (instant, always succeeds), then
+// grab an offline copy in the same flow. On iPhone the extension is the only
+// strong-capture moment — you can't add an offline copy later from the app — so
+// every save attempts offline automatically. If the page can't be extracted the
+// link is still saved, just flagged "offline unavailable".
+saveBtn.addEventListener("click", async () => {
+    if (!currentTab?.url) return;
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
+    statusEl.textContent = "";
 
-async function deleteItem(url) {
-    const response = await browser.runtime.sendMessage({ action: "deleteItem", url });
-    allItems = response?.items ?? allItems;
-    render();
-}
+    // 1) Save the link — the part that must not fail.
+    try {
+        const res = await sendNative({
+            action: "saveItem",
+            url: currentTab.url,
+            title: currentTab.title || currentTab.url,
+        });
+        if (res?.error) throw new Error(res.error);
+    } catch {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "+ Save this page";
+        statusEl.textContent = "Couldn't save — try again.";
+        return;
+    }
+    markSaved("Saved.");
 
-function exportData() {
-    const json = JSON.stringify(allItems, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `read-later-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-function importData(file) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if (!Array.isArray(imported)) throw new Error("Invalid format");
-
-            const valid = imported.filter((i) => i.url && i.title);
-            const existingUrls = new Set(allItems.map((i) => i.url));
-            const newItems = valid.filter((i) => !existingUrls.has(i.url));
-
-            for (const item of newItems) {
-                await browser.runtime.sendMessage({ action: "saveItem", url: item.url, title: item.title });
-            }
-            await load();
-
-            const msg = document.getElementById("import-msg");
-            msg.textContent = `+${newItems.length} imported`;
-            setTimeout(() => { msg.textContent = ""; }, 2500);
-        } catch {
-            const msg = document.getElementById("import-msg");
-            msg.style.color = "#ff3b30";
-            msg.textContent = "Invalid file";
-            setTimeout(() => { msg.textContent = ""; msg.style.color = "#34c759"; }, 2500);
+    // 2) Grab the offline copy (best-effort; the link is already saved). Keep
+    //    the popup open until this finishes — dismissing it early cancels the
+    //    capture, and on iOS there's no way to add it later from the app.
+    statusEl.textContent = "Adding offline copy…";
+    try {
+        const article = await extractCurrentPage();
+        if (!article.ok || (article.length || 0) < OFFLINE_MIN_LENGTH) {
+            await sendNative({ action: "setOffline", url: currentTab.url, status: "unavailable" });
+            statusEl.textContent = "Saved — this page can’t be read offline.";
+            return;
         }
-    };
-    reader.readAsText(file);
+        const { token } = await sendNative({ action: "getToken" });
+        if (!token) throw new Error("no token");
+        const wire = await encryptEnvelope(currentTab.url, article, token);
+        if (!(await uploadBody(currentTab.url, wire, token))) throw new Error("upload failed");
+        await sendNative({ action: "setOffline", url: currentTab.url, status: "saved" });
+        statusEl.textContent = "✓ Saved & available offline.";
+    } catch {
+        // Link is saved; the offline copy didn't complete. No background retry
+        // on iOS, so invite another save to try again.
+        statusEl.textContent = "Saved — reopen and save again to add offline.";
+    }
+});
+
+function sendNative(message) {
+    return browser.runtime.sendMessage(message);
 }
 
-saveBtn.addEventListener("click", save);
-
-searchEl.addEventListener("input", () => {
-    searchQuery = searchEl.value.trim();
-    render();
-});
-
-document.querySelectorAll(".filter").forEach((btn) => {
-    btn.addEventListener("click", () => {
-        document.querySelectorAll(".filter").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentFilter = btn.dataset.filter;
-        render();
+// Injects the self-contained extractor (content.js = Readability + DOMPurify +
+// snippet) into the active tab and waits for it to message the result back.
+function extractCurrentPage() {
+    return new Promise((resolve) => {
+        const timer = setTimeout(() => {
+            browser.runtime.onMessage.removeListener(listener);
+            resolve({ ok: false, reason: "timeout" });
+        }, 15000);
+        function listener(msg) {
+            if (msg?.action === "offlineExtracted") {
+                clearTimeout(timer);
+                browser.runtime.onMessage.removeListener(listener);
+                resolve(msg.article || { ok: false, reason: "no-article" });
+            }
+        }
+        browser.runtime.onMessage.addListener(listener);
+        browser.scripting
+            .executeScript({ target: { tabId: currentTab.id }, files: ["content.js"] })
+            .catch((e) => {
+                clearTimeout(timer);
+                browser.runtime.onMessage.removeListener(listener);
+                resolve({ ok: false, reason: String(e) });
+            });
     });
-});
+}
 
-document.getElementById("export-btn").addEventListener("click", exportData);
-document.getElementById("import-input").addEventListener("change", (e) => {
-    if (e.target.files[0]) importData(e.target.files[0]);
-    e.target.value = "";
-});
+// --- Crypto: HKDF-SHA256 -> AES-256-GCM (see readlater-sync/CRYPTO.md) -------
 
-load();
+async function deriveKey(token) {
+    const enc = new TextEncoder();
+    const ikm = await crypto.subtle.importKey("raw", enc.encode(token), "HKDF", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+        { name: "HKDF", hash: "SHA-256", salt: enc.encode("rtl-offline-v1"), info: enc.encode("body") },
+        ikm,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt"],
+    );
+}
+
+function bytesToB64(bytes) {
+    let bin = "";
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin);
+}
+
+// Encrypts the article envelope; wire = base64( iv(12) || ciphertext||tag ).
+async function encryptEnvelope(url, article, token) {
+    const envelope = JSON.stringify({
+        v: OFFLINE_PAYLOAD_VERSION,
+        url,
+        title: article.title || "",
+        siteName: article.siteName || "",
+        excerpt: article.excerpt || "",
+        length: article.length || 0,
+        html: article.html || "",
+        capturedAt: Date.now(),
+    });
+    const key = await deriveKey(token);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(envelope));
+    const out = new Uint8Array(iv.length + ct.byteLength);
+    out.set(iv, 0);
+    out.set(new Uint8Array(ct), iv.length);
+    return bytesToB64(out);
+}
+
+async function uploadBody(url, wire, token) {
+    const res = await fetch(`${WORKER_URL}/body`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ url, ciphertext: wire, meta: { v: OFFLINE_PAYLOAD_VERSION } }),
+    });
+    return res.ok;
+}
+
+init();

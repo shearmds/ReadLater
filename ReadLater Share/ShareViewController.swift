@@ -9,7 +9,7 @@ class ShareViewController: SLComposeServiceViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Read This Later"
+        title = "Research Sync"
         extractSharedContent()
     }
 

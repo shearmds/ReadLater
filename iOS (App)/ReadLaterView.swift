@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 struct ReadLaterView: View {
@@ -6,13 +7,86 @@ struct ReadLaterView: View {
     @State private var searchText = ""
     @State private var showSettings = false
     @State private var notesItem: ReadLaterItem?
+    @State private var readerItem: ReadLaterItem?
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
+    // Local to this app install — not synced, so the app can show folders
+    // independently of the browser extensions (or vice versa).
+    @AppStorage("groupByFolder") private var groupByFolder: Bool = false
+    @State private var collapsedFolders: Set<String> =
+        Set(UserDefaults.standard.stringArray(forKey: "collapsedFolders") ?? [])
+    // The most recently classified item, so its folder can show a "new" dot
+    // if that section is collapsed. Session-only, cleared on expand or once
+    // it times out (see recentlyClassifiedFolder).
+    @State private var recentlyClassified: (url: String, folder: String, at: Date)?
+    // Bumped by a periodic timer purely to force body re-evaluation, so the
+    // "Sorting…" spinner and the "new" dot correctly time out on their own
+    // even with no further data change.
+    @State private var tick = false
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
 
     enum Filter: String, CaseIterable {
         case all = "All", unread = "Unread", read = "Read"
+    }
+
+    private static let unsortedLabel = "Unsorted"
+    private static let pendingWindow: TimeInterval = 3 * 60
+    private static let recentDotWindow: TimeInterval = 5 * 60
+
+    private var effectiveGrouped: Bool { groupByFolder && searchText.isEmpty }
+
+    private func isPendingClassification(_ item: ReadLaterItem) -> Bool {
+        _ = tick // read to establish a dependency so the timer bump re-evaluates this
+        return !item.deleted
+            && Date().timeIntervalSince1970 * 1000 - item.savedAt < Self.pendingWindow * 1000
+    }
+
+    private func recentlyClassifiedFolder() -> String? {
+        _ = tick
+        guard let recentlyClassified else { return nil }
+        guard Date().timeIntervalSince(recentlyClassified.at) <= Self.recentDotWindow else { return nil }
+        return recentlyClassified.folder
+    }
+
+    private var groupedSections: [(folder: String, items: [ReadLaterItem])] {
+        var groups: [String: [ReadLaterItem]] = [:]
+        for item in filtered {
+            groups[item.folder ?? Self.unsortedLabel, default: []].append(item)
+        }
+        let named = groups.keys.filter { $0 != Self.unsortedLabel }.sorted()
+        let ordered = groups[Self.unsortedLabel] != nil ? named + [Self.unsortedLabel] : named
+        return ordered.map { ($0, groups[$0] ?? []) }
+    }
+
+    private func expandedBinding(for folder: String) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedFolders.contains(folder) },
+            set: { isExpanded in
+                var next = collapsedFolders
+                if isExpanded {
+                    next.remove(folder)
+                    if recentlyClassified?.folder == folder { recentlyClassified = nil }
+                } else {
+                    next.insert(folder)
+                }
+                collapsedFolders = next
+                UserDefaults.standard.set(Array(next), forKey: "collapsedFolders")
+            }
+        )
+    }
+
+    // Detects a folder-classification transition (existed before with no
+    // folder, now has one) before overwriting `items`, so both the fast-poll
+    // path and the notification-driven refresh path share one diff.
+    private func updateItems(_ newItems: [ReadLaterItem]) {
+        let oldFolders = Dictionary(uniqueKeysWithValues: items.map { ($0.url, $0.folder) })
+        for item in newItems {
+            if let folder = item.folder, let old = oldFolders[item.url], old == nil {
+                recentlyClassified = (item.url, folder, Date())
+            }
+        }
+        items = newItems
     }
 
     private var isRegular: Bool { hSizeClass == .regular }
@@ -49,7 +123,7 @@ struct ReadLaterView: View {
 
                         VStack(spacing: 12) {
                             HStack {
-                                Text("RTL: Research Sync")
+                                Text("Research Sync")
                                     .font(titleFont)
                                     .foregroundColor(.white)
                                     .lineLimit(1)
@@ -63,6 +137,14 @@ struct ReadLaterView: View {
                                         .padding(.vertical, 4)
                                         .background(.white.opacity(0.2))
                                         .clipShape(Capsule())
+                                }
+                                Button { groupByFolder.toggle() } label: {
+                                    Image(systemName: groupByFolder ? "folder.fill" : "folder")
+                                        .font(isRegular ? .title3 : .body)
+                                        // Dims (without turning fully off) while a search
+                                        // is overriding grouping — signals "paused", not "off".
+                                        .foregroundColor(.white.opacity(
+                                            groupByFolder ? (effectiveGrouped ? 0.9 : 0.5) : 0.6))
                                 }
                                 Button { showSettings = true } label: {
                                     Image(systemName: "gearshape.fill")
@@ -98,12 +180,36 @@ struct ReadLaterView: View {
                         HStack(spacing: 0) {
                             Spacer(minLength: 0)
                             List {
-                                ForEach(filtered, id: \.url) { item in
-                                    ItemRow(item: item,
-                                        onTap:        { openAndMarkRead(item) },
-                                        onToggleRead: { toggleRead(item.url) },
-                                        onDelete:     { delete(item.url) },
-                                        onNoteTap:    { notesItem = item })
+                                if effectiveGrouped {
+                                    ForEach(groupedSections, id: \.folder) { section in
+                                        DisclosureGroup(isExpanded: expandedBinding(for: section.folder)) {
+                                            ForEach(section.items, id: \.url) { item in
+                                                ItemRow(item: item, showFolder: false,
+                                                    isPending: isPendingClassification(item),
+                                                    onTap:        { openAndMarkRead(item) },
+                                                    onToggleRead: { toggleRead(item.url) },
+                                                    onDelete:     { delete(item.url) },
+                                                    onNoteTap:    { notesItem = item },
+                                                    onOfflineRead: { readerItem = item })
+                                            }
+                                        } label: {
+                                            FolderSectionHeader(
+                                                name: section.folder,
+                                                count: section.items.count,
+                                                showDot: !expandedBinding(for: section.folder).wrappedValue
+                                                    && recentlyClassifiedFolder() == section.folder)
+                                        }
+                                    }
+                                } else {
+                                    ForEach(filtered, id: \.url) { item in
+                                        ItemRow(item: item, showFolder: true,
+                                            isPending: isPendingClassification(item),
+                                            onTap:        { openAndMarkRead(item) },
+                                            onToggleRead: { toggleRead(item.url) },
+                                            onDelete:     { delete(item.url) },
+                                            onNoteTap:    { notesItem = item },
+                                            onOfflineRead: { readerItem = item })
+                                    }
                                 }
                             }
                             .listStyle(.plain)
@@ -118,6 +224,13 @@ struct ReadLaterView: View {
             .searchable(text: $searchText, prompt: "Search")
             .onAppear { refresh() }
             .refreshable { refresh() }
+            .onReceive(NotificationCenter.default.publisher(for: .readLaterDidChange)) { _ in
+                updateItems(ReadLaterStore.shared.visible())
+            }
+            .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
+                let hasPending = items.contains { $0.folder == nil && isPendingClassification($0) }
+                if hasPending || recentlyClassifiedFolder() != nil { tick.toggle() }
+            }
             .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
                 SyncKeySettingsView()
             }
@@ -126,19 +239,28 @@ struct ReadLaterView: View {
                     item: item,
                     onSave: { newNotes in
                         ReadLaterStore.shared.setNotes(url: item.url, notes: newNotes)
-                        items = ReadLaterStore.shared.visible()
+                        updateItems(ReadLaterStore.shared.visible())
                         ReadLaterStore.shared.syncWithCloud()
                     },
                     onOpen: { openAndMarkRead(item) }
                 )
             }
+            .sheet(item: $readerItem) { item in
+                OfflineReaderView(item: item)
+            }
         }
     }
 
     private func refresh() {
-        items = ReadLaterStore.shared.visible()
+        updateItems(ReadLaterStore.shared.visible())
         ReadLaterStore.shared.syncWithCloud { _ in
-            DispatchQueue.main.async { items = ReadLaterStore.shared.visible() }
+            DispatchQueue.main.async {
+                let latest = ReadLaterStore.shared.visible()
+                updateItems(latest)
+                // Pre-download bodies for newly-saved items so they're
+                // readable offline later (while we still have a connection).
+                OfflineBodyStore.shared.prefetchMissing(latest)
+            }
         }
     }
 
@@ -148,30 +270,59 @@ struct ReadLaterView: View {
         }
         if !item.read {
             ReadLaterStore.shared.toggleRead(url: item.url)
-            items = ReadLaterStore.shared.visible()
+            updateItems(ReadLaterStore.shared.visible())
             ReadLaterStore.shared.syncWithCloud()
         }
     }
 
     private func toggleRead(_ url: String) {
         ReadLaterStore.shared.toggleRead(url: url)
-        items = ReadLaterStore.shared.visible()
+        updateItems(ReadLaterStore.shared.visible())
         ReadLaterStore.shared.syncWithCloud()
     }
 
     private func delete(_ url: String) {
         ReadLaterStore.shared.delete(url: url)
-        items = ReadLaterStore.shared.visible()
+        updateItems(ReadLaterStore.shared.visible())
         ReadLaterStore.shared.syncWithCloud()
+    }
+}
+
+struct FolderSectionHeader: View {
+    let name: String
+    let count: Int
+    let showDot: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(name)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+            if showDot {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 6, height: 6)
+                    .accessibilityLabel("A new item just landed here")
+            }
+            Spacer()
+            Text("\(count)")
+                .font(.caption.weight(.semibold))
+                .foregroundColor(Color(.tertiaryLabel))
+        }
     }
 }
 
 struct ItemRow: View {
     let item: ReadLaterItem
+    // Only shown in flat view — in grouped view the folder is already the
+    // section header, so repeating it on every item would be redundant.
+    let showFolder: Bool
+    let isPending: Bool
     let onTap: () -> Void
     let onToggleRead: () -> Void
     let onDelete: () -> Void
     let onNoteTap: () -> Void
+    let onOfflineRead: () -> Void
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     private var faviconSize: CGFloat { hSizeClass == .regular ? 36 : 28 }
@@ -208,9 +359,29 @@ struct ItemRow: View {
                             .background(category.color.opacity(0.15))
                             .clipShape(Capsule())
                     }
+                    if showFolder, let folder = item.folder {
+                        Text(folder)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundColor(Color(red: 0.42, green: 0.25, blue: 0.63))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Color(red: 0.42, green: 0.25, blue: 0.63).opacity(0.15))
+                            .clipShape(Capsule())
+                    } else if item.folder == nil && isPending {
+                        // Shown regardless of showFolder (unlike the folder tag) —
+                        // meaningful even inside a collapsed "Unsorted" group, since
+                        // it explains *why* the item is still there.
+                        HStack(spacing: 4) {
+                            ProgressView().controlSize(.mini)
+                            Text("Sorting…")
+                        }
+                        .font(.caption2.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    }
                 }
             }
             Spacer()
+            offlineIndicator
             Button(action: onNoteTap) {
                 Image(systemName: "note.text")
                     .font(hSizeClass == .regular ? .title3 : .body)
@@ -233,6 +404,37 @@ struct ItemRow: View {
                       systemImage: item.read ? "envelope.badge" : "checkmark")
             }
             .tint(item.read ? .orange : .green)
+        }
+    }
+
+    private var iconFont: Font { hSizeClass == .regular ? .title3 : .body }
+
+    // Mirrors the browser extension's per-item offline badge:
+    // saved = tappable book, requested = spinner, unavailable = muted closed
+    // book (informational — capture happens on a browser/Safari surface, so
+    // there's nothing to retry from the app), none = nothing.
+    @ViewBuilder
+    private var offlineIndicator: some View {
+        switch item.offline {
+        case .saved:
+            Button(action: onOfflineRead) {
+                Image(systemName: "book")
+                    .font(iconFont)
+                    .foregroundColor(.accentColor)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Read offline")
+        case .requested:
+            ProgressView()
+                .controlSize(.small)
+                .accessibilityLabel("Saving for offline")
+        case .unavailable:
+            Image(systemName: "book.closed")
+                .font(iconFont)
+                .foregroundColor(.secondary.opacity(0.35))
+                .accessibilityLabel("Offline not available")
+        case .none:
+            EmptyView()
         }
     }
 
@@ -359,7 +561,7 @@ struct SyncKeySettingsView: View {
     }
 
     private static func csvExport() -> Data? {
-        var rows = [["Title", "URL", "Saved", "Read", "Notes"]]
+        var rows = [["Title", "URL", "Saved", "Read", "Folder", "Notes"]]
         let formatter = ISO8601DateFormatter()
         for item in ReadLaterStore.shared.visible() {
             rows.append([
@@ -367,6 +569,7 @@ struct SyncKeySettingsView: View {
                 item.url,
                 formatter.string(from: Date(timeIntervalSince1970: item.savedAt / 1000)),
                 item.read ? "Yes" : "No",
+                item.folder ?? "",
                 item.notes ?? "",
             ])
         }

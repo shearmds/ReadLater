@@ -4,12 +4,11 @@
 
     "name": "__MSG_extension_name__",
     "description": "__MSG_extension_description__",
-    "version": "1.1",
+    "version": "1.2",
 
     "icons": {
         "48": "images/icon-48.png",
         "96": "images/icon-96.png",
-        "128": "images/icon-128.png",
         "256": "images/icon-256.png",
         "512": "images/icon-512.png"
     },
@@ -24,12 +23,12 @@
         "default_popup": "popup.html",
         "default_icon": {
             "48": "images/icon-48.png",
-            "96": "images/icon-96.png",
-            "128": "images/icon-128.png"
+            "96": "images/icon-96.png"
         },
-        "default_title": "Save to Read Later"
+        "default_title": "Save to Research Sync"
     },
 
-    "permissions": [ "activeTab", "storage", "tabs" ],
-    "host_permissions": [ "http://localhost:57832/*" ]
+    "permissions": [ "activeTab", "tabs", "nativeMessaging", "scripting" ],
+
+    "host_permissions": [ "https://readlater-sync.shearm.workers.dev/*" ]
 }
