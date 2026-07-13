@@ -483,7 +483,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
@@ -498,7 +498,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -526,7 +526,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "ReadLater (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
@@ -541,7 +541,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -683,7 +683,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ReadLater Share/Info.plist";
@@ -695,7 +695,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -714,7 +714,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Share/ReadLater Share.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ReadLater Share/Info.plist";
@@ -726,7 +726,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -748,7 +748,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Read This Later Widget/Read This Later Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Read This Later Widget/Info.plist";
@@ -760,7 +760,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -781,7 +781,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Read This Later Widget/Read This Later Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Read This Later Widget/Info.plist";
@@ -793,7 +793,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mdshear.ReadLater.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -813,7 +813,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
@@ -825,7 +825,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -850,7 +850,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "ReadLater Extension (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEVELOPMENT_TEAM = 95E9CZ9HW6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
@@ -862,7 +862,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
