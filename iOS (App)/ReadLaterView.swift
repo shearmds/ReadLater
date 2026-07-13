@@ -24,7 +24,14 @@ struct ReadLaterView: View {
     @State private var tick = false
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
+    // Search is revealed on demand from the header (QuickNote's pattern), rather
+    // than living in a bottom `.searchable` bar where the keyboard can hide it.
+    @State private var isSearchVisible = false
+    @FocusState private var isSearchFocused: Bool
+    @AppStorage("noteTextSizeV2") private var textSizeRaw: Int = NoteTextSize.standard.rawValue
+
     private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
+    private var textSize: NoteTextSize { NoteTextSize(rawValue: textSizeRaw) ?? .standard }
 
     enum Filter: String, CaseIterable {
         case all = "All", unread = "Unread", read = "Read"
@@ -90,9 +97,43 @@ struct ReadLaterView: View {
     }
 
     private var isRegular: Bool { hSizeClass == .regular }
-    private var headerHeight: CGFloat { isRegular ? 180 : 130 }
     private var contentMaxWidth: CGFloat { isRegular ? 760 : .infinity }
-    private var titleFont: Font { isRegular ? .system(size: 28, weight: .bold) : .title2.bold() }
+    private var titleFont: Font {
+        isRegular ? .system(size: 28, weight: .bold, design: .rounded)
+                  : .system(.title2, design: .rounded).bold()
+    }
+
+    // A search field styled to match QuickNote's: a soft filled capsule with a
+    // leading glyph and a clear button that also dismisses the field.
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search", text: $searchText)
+                .textFieldStyle(.plain)
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            Button {
+                searchText = ""
+                isSearchFocused = false
+                withAnimation(.easeInOut(duration: 0.2)) { isSearchVisible = false }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .scaledFont(.body)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color.primary.opacity(0.06))
+        .cornerRadius(10)
+        .frame(maxWidth: contentMaxWidth)
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+    }
 
     var filtered: [ReadLaterItem] {
         items.filter { item in
@@ -113,67 +154,110 @@ struct ReadLaterView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                Color(.systemGroupedBackground).ignoresSafeArea()
+                theme.appBackground.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Gradient header — extends edge-to-edge; inner content is width-capped on iPad.
-                    ZStack {
-                        theme.gradient
-                        .ignoresSafeArea(edges: .top)
-
-                        VStack(spacing: 12) {
-                            HStack {
+                    // Header — a white section with black text and icons, framed
+                    // by a subtle themed gradient outline (echoing QuickNote's
+                    // focused-field border). The selected theme now reads as the
+                    // accent outline rather than a full banner fill.
+                    VStack(spacing: 18) {
+                        HStack(alignment: .center) {
+                            // Title, with the unread count as a quiet subtitle
+                            // beneath it (only when there's something unread) —
+                            // replaces the floating pill that crowded this row.
+                            VStack(alignment: .leading, spacing: 3) {
                                 Text("Research Sync")
                                     .font(titleFont)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.6)
-                                Spacer()
                                 if unreadCount > 0 {
                                     Text("\(unreadCount) unread")
-                                        .font(isRegular ? .body : .subheadline)
-                                        .foregroundColor(.white.opacity(0.8))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
-                                        .background(.white.opacity(0.2))
-                                        .clipShape(Capsule())
+                                        .scaledFont(.subheadline, weight: .medium)
+                                        .foregroundColor(.secondary)
                                 }
+                            }
+                            Spacer()
+                            // The search/folder/settings cluster, grouped on a
+                            // subtle raised white pill (matching the glass capsule
+                            // QuickNote's system toolbar gives its icons).
+                            HStack(spacing: 18) {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) { isSearchVisible = true }
+                                    isSearchFocused = true
+                                } label: {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.primary)
+                                }
+                                .buttonStyle(PressableButtonStyle())
+
                                 Button { groupByFolder.toggle() } label: {
+                                    // The fill vs. outline glyph already signals on/off;
+                                    // dim it while a search is overriding grouping.
                                     Image(systemName: groupByFolder ? "folder.fill" : "folder")
-                                        .font(isRegular ? .title3 : .body)
-                                        // Dims (without turning fully off) while a search
-                                        // is overriding grouping — signals "paused", not "off".
-                                        .foregroundColor(.white.opacity(
-                                            groupByFolder ? (effectiveGrouped ? 0.9 : 0.5) : 0.6))
+                                        .foregroundColor(.primary.opacity(
+                                            groupByFolder ? (effectiveGrouped ? 1.0 : 0.4) : 0.6))
                                 }
+                                .buttonStyle(PressableButtonStyle())
+
                                 Button { showSettings = true } label: {
                                     Image(systemName: "gearshape.fill")
-                                        .font(isRegular ? .title3 : .body)
-                                        .foregroundColor(.white.opacity(0.9))
+                                        .foregroundColor(.primary)
                                 }
+                                .buttonStyle(PressableButtonStyle())
                             }
-                            .padding(.horizontal)
-
-                            Picker("Filter", selection: $filter) {
-                                ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                            }
-                            .pickerStyle(.segmented)
-                            .padding(.horizontal)
-                            .colorMultiply(.white)
+                            .font(isRegular ? .title3 : .body)
+                            .imageScale(.large)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 9)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.08), radius: 3, x: 0, y: 1)
+                            )
+                            .overlay(
+                                Capsule().strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                            )
                         }
-                        .frame(maxWidth: contentMaxWidth)
-                        .padding(.top, 8)
-                        .padding(.bottom, 14)
+
+                        Picker("Filter", selection: $filter) {
+                            ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
                     }
-                    .frame(height: headerHeight)
+                    .padding(.horizontal, 18)
+                    .padding(.top, 22)
+                    .padding(.bottom, 20)
+                    .frame(maxWidth: contentMaxWidth)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .strokeBorder(theme.gradient, lineWidth: 1.5)
+                    )
+                    .shadow(color: theme.start.opacity(0.15), radius: 8, x: 0, y: 3)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                    // Search field slides in just below the header when the
+                    // magnifying glass is tapped (QuickNote's pattern), so the
+                    // keyboard never hides it.
+                    if isSearchVisible {
+                        searchBar
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
 
                     if filtered.isEmpty {
                         Spacer()
                         Image(systemName: "bookmark")
                             .font(.system(size: 48))
-                            .foregroundColor(.secondary.opacity(0.4))
+                            .foregroundStyle(theme.gradient.opacity(0.5))
                             .padding(.bottom, 12)
                         Text(searchText.isEmpty ? "Nothing here yet" : "No results")
+                            .scaledFont(.subheadline)
                             .foregroundColor(.secondary)
                         Spacer()
                     } else {
@@ -186,11 +270,13 @@ struct ReadLaterView: View {
                                             ForEach(section.items, id: \.url) { item in
                                                 ItemRow(item: item, showFolder: false,
                                                     isPending: isPendingClassification(item),
+                                                    theme: theme,
                                                     onTap:        { openAndMarkRead(item) },
                                                     onToggleRead: { toggleRead(item.url) },
                                                     onDelete:     { delete(item.url) },
                                                     onNoteTap:    { notesItem = item },
                                                     onOfflineRead: { readerItem = item })
+                                                    .cardRow()
                                             }
                                         } label: {
                                             FolderSectionHeader(
@@ -199,21 +285,24 @@ struct ReadLaterView: View {
                                                 showDot: !expandedBinding(for: section.folder).wrappedValue
                                                     && recentlyClassifiedFolder() == section.folder)
                                         }
+                                        .cardRow()
                                     }
                                 } else {
                                     ForEach(filtered, id: \.url) { item in
                                         ItemRow(item: item, showFolder: true,
                                             isPending: isPendingClassification(item),
+                                            theme: theme,
                                             onTap:        { openAndMarkRead(item) },
                                             onToggleRead: { toggleRead(item.url) },
                                             onDelete:     { delete(item.url) },
                                             onNoteTap:    { notesItem = item },
                                             onOfflineRead: { readerItem = item })
+                                            .cardRow()
                                     }
                                 }
                             }
                             .listStyle(.plain)
-                            .background(Color(.systemBackground))
+                            .scrollContentBackground(.hidden)
                             .frame(maxWidth: contentMaxWidth)
                             Spacer(minLength: 0)
                         }
@@ -221,7 +310,8 @@ struct ReadLaterView: View {
                 }
             }
             .navigationBarHidden(true)
-            .searchable(text: $searchText, prompt: "Search")
+            .preferredColorScheme(.light)
+            .environment(\.noteTextScale, textSize.scale)
             .onAppear { refresh() }
             .refreshable { refresh() }
             .onReceive(NotificationCenter.default.publisher(for: .readLaterDidChange)) { _ in
@@ -296,7 +386,7 @@ struct FolderSectionHeader: View {
     var body: some View {
         HStack(spacing: 6) {
             Text(name)
-                .font(.subheadline.weight(.semibold))
+                .scaledFont(.subheadline, weight: .semibold)
                 .foregroundColor(.secondary)
             if showDot {
                 Circle()
@@ -306,9 +396,10 @@ struct FolderSectionHeader: View {
             }
             Spacer()
             Text("\(count)")
-                .font(.caption.weight(.semibold))
+                .scaledFont(.caption, weight: .semibold)
                 .foregroundColor(Color(.tertiaryLabel))
         }
+        .padding(.vertical, 2)
     }
 }
 
@@ -318,6 +409,7 @@ struct ItemRow: View {
     // section header, so repeating it on every item would be redundant.
     let showFolder: Bool
     let isPending: Bool
+    let theme: AppTheme
     let onTap: () -> Void
     let onToggleRead: () -> Void
     let onDelete: () -> Void
@@ -343,29 +435,22 @@ struct ItemRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(displayTitle)
-                    .font(hSizeClass == .regular ? .title3 : .body)
-                    .foregroundColor(item.read ? .secondary : .primary)
+                    .scaledFont(hSizeClass == .regular ? .title3 : .body, weight: .medium)
+                    .foregroundColor(item.read ? .secondary : .primary.opacity(0.9))
                     .lineLimit(2)
                 HStack(spacing: 6) {
                     Text(hostname)
-                        .font(hSizeClass == .regular ? .subheadline : .caption)
+                        .scaledFont(hSizeClass == .regular ? .subheadline : .caption)
                         .foregroundColor(.secondary)
-                    if let category = ArticleCategory.forURL(item.url) {
-                        Text(category.rawValue)
-                            .font(.caption2.weight(.semibold))
-                            .foregroundColor(category.color)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(category.color.opacity(0.15))
-                            .clipShape(Capsule())
-                    }
+                    // Only the AI-assigned folder tag is shown; the older
+                    // URL-derived category tag was redundant with it.
                     if showFolder, let folder = item.folder {
                         Text(folder)
                             .font(.caption2.weight(.semibold))
-                            .foregroundColor(Color(red: 0.42, green: 0.25, blue: 0.63))
+                            .foregroundColor(theme.end)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
-                            .background(Color(red: 0.42, green: 0.25, blue: 0.63).opacity(0.15))
+                            .background(theme.end.opacity(0.15))
                             .clipShape(Capsule())
                     } else if item.folder == nil && isPending {
                         // Shown regardless of showFolder (unlike the folder tag) —
@@ -385,12 +470,33 @@ struct ItemRow: View {
             Button(action: onNoteTap) {
                 Image(systemName: "note.text")
                     .font(hSizeClass == .regular ? .title3 : .body)
-                    .foregroundColor(hasNotes ? .accentColor : .secondary.opacity(0.35))
+                    .foregroundColor(hasNotes ? theme.end : .secondary.opacity(0.35))
             }
             .buttonStyle(.plain)
         }
-        .padding(.vertical, hSizeClass == .regular ? 6 : 4)
-        .opacity(item.read ? 0.55 : 1)
+        // Recede the row's content once read, but keep the card itself solid.
+        .opacity(item.read ? 0.7 : 1)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(item.read ? Color.primary.opacity(0.04) : Color.white)
+        )
+        // Accent spine: the selected theme's gradient for unread items, a muted
+        // grey once read — so the theme threads through every card.
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(item.read ? AnyShapeStyle(Color.secondary.opacity(0.3))
+                                : AnyShapeStyle(theme.gradient))
+                .frame(width: 4)
+                .padding(.vertical, 10)
+                .padding(.leading, 5)
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
         .onTapGesture { onTap() }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -420,7 +526,7 @@ struct ItemRow: View {
             Button(action: onOfflineRead) {
                 Image(systemName: "book")
                     .font(iconFont)
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(theme.end)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Read offline")
@@ -457,6 +563,7 @@ struct ItemRow: View {
 struct SyncKeySettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
+    @AppStorage("noteTextSizeV2") private var textSizeRaw: Int = NoteTextSize.standard.rawValue
     @State private var key: String = ReadLaterStore.shared.syncToken
     @State private var message: String?
 
@@ -484,6 +591,15 @@ struct SyncKeySettingsView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                }
+
+                Section("Text Size") {
+                    Picker("Text Size", selection: $textSizeRaw) {
+                        ForEach(NoteTextSize.allCases) { size in
+                            Text(size.label).tag(size.rawValue)
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
 
                 Section {

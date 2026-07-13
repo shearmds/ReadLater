@@ -8,7 +8,8 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
-  background: #f9f9fb;
+  /* A whisper of the theme's color behind the content, matching the app. */
+  background: linear-gradient(180deg, #ffffff 0%, rgba(38, 198, 218, 0.06) 100%);
   color: #1a1a1a;
   width: 320px;
 }
@@ -21,43 +22,55 @@ body {
 #app { display: flex; flex-direction: column; }
 
 header {
-  padding: 14px;
+  padding: 16px 16px 18px;
   background: linear-gradient(135deg, var(--theme-start) 0%, var(--theme-end) 100%);
   color: #fff;
 }
 
-h1 { font-size: 17px; font-weight: 700; }
+h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.2px; }
 
 main {
   padding: 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* The page title reads as a soft card, echoing the app's list rows. */
 #page-title {
   font-size: 13px;
   color: #3a3a3c;
-  line-height: 1.35;
+  line-height: 1.4;
   max-height: 3.4em;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 #save-btn {
-  padding: 12px 14px;
-  background: var(--theme-end);
+  padding: 13px 14px;
+  background: linear-gradient(135deg, var(--theme-start) 0%, var(--theme-end) 100%);
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 3px 8px rgba(21, 101, 192, 0.28);
+  transition: transform 0.12s ease, opacity 0.12s ease;
 }
-#save-btn:disabled { opacity: 0.6; cursor: default; }
-#save-btn.saved { background: #34c759; }
+#save-btn:active { transform: scale(0.97); opacity: 0.92; }
+#save-btn:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+#save-btn.saved {
+  background: #34c759;
+  box-shadow: 0 3px 8px rgba(52, 199, 89, 0.28);
+}
 
 #status {
   font-size: 12px;
