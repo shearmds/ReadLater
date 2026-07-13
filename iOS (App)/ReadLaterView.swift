@@ -8,6 +8,8 @@ struct ReadLaterView: View {
     @State private var showSettings = false
     @State private var notesItem: ReadLaterItem?
     @State private var readerItem: ReadLaterItem?
+    // iPad master/detail selection (by URL, so it survives list refreshes).
+    @State private var selectedURL: String?
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
     // Local to this app install — not synced, so the app can show folders
     // independently of the browser extensions (or vice versa).
@@ -98,10 +100,12 @@ struct ReadLaterView: View {
 
     private var isRegular: Bool { hSizeClass == .regular }
     private var contentMaxWidth: CGFloat { isRegular ? 760 : .infinity }
-    private var titleFont: Font {
-        isRegular ? .system(size: 28, weight: .bold, design: .rounded)
-                  : .system(.title2, design: .rounded).bold()
-    }
+    // The currently-selected article for the iPad detail pane, resolved from the
+    // live list so it reflects edits (read state, notes) as they happen.
+    private var selectedItem: ReadLaterItem? { items.first { $0.url == selectedURL } }
+    // Title sits in the (narrow) iPad sidebar as well as the iPhone header, so
+    // it stays a compact size on both rather than ballooning on regular width.
+    private var titleFont: Font { .system(.title2, design: .rounded).bold() }
 
     // A search field styled to match QuickNote's: a soft filled capsule with a
     // leading glyph and a clear button that also dismisses the field.
@@ -152,193 +156,251 @@ struct ReadLaterView: View {
     var unreadCount: Int { items.filter { !$0.read }.count }
 
     var body: some View {
+        Group {
+            if isRegular {
+                iPadBody
+            } else {
+                iPhoneBody
+            }
+        }
+        .preferredColorScheme(.light)
+        .environment(\.noteTextScale, textSize.scale)
+        .onAppear { refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: .readLaterDidChange)) { _ in
+            updateItems(ReadLaterStore.shared.visible())
+        }
+        .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
+            let hasPending = items.contains { $0.folder == nil && isPendingClassification($0) }
+            if hasPending || recentlyClassifiedFolder() != nil { tick.toggle() }
+        }
+        .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
+            SyncKeySettingsView()
+        }
+        .sheet(item: $notesItem) { item in
+            NotesEditorView(
+                item: item,
+                onSave: { newNotes in
+                    ReadLaterStore.shared.setNotes(url: item.url, notes: newNotes)
+                    updateItems(ReadLaterStore.shared.visible())
+                    ReadLaterStore.shared.syncWithCloud()
+                },
+                onOpen: { openAndMarkRead(item) }
+            )
+        }
+        .sheet(item: $readerItem) { item in
+            OfflineReaderView(item: item)
+        }
+    }
+
+    // iPhone / compact width: single column; tapping a row opens the article.
+    private var iPhoneBody: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
-                theme.appBackground.ignoresSafeArea()
+            listColumn(isSplit: false)
+                .navigationBarHidden(true)
+        }
+    }
 
-                VStack(spacing: 0) {
-                    // Header — a white section with black text and icons, framed
-                    // by a subtle themed gradient outline (echoing QuickNote's
-                    // focused-field border). The selected theme now reads as the
-                    // accent outline rather than a full banner fill.
-                    VStack(spacing: 18) {
-                        HStack(alignment: .center) {
-                            // Title, with the unread count as a quiet subtitle
-                            // beneath it (only when there's something unread) —
-                            // replaces the floating pill that crowded this row.
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Research Sync")
-                                    .font(titleFont)
-                                    .foregroundColor(.primary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.6)
-                                if unreadCount > 0 {
-                                    Text("\(unreadCount) unread")
-                                        .scaledFont(.subheadline, weight: .medium)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            Spacer()
-                            // The search/folder/settings cluster, grouped on a
-                            // subtle raised white pill (matching the glass capsule
-                            // QuickNote's system toolbar gives its icons).
-                            HStack(spacing: 18) {
-                                Button {
-                                    withAnimation(.easeInOut(duration: 0.2)) { isSearchVisible = true }
-                                    isSearchFocused = true
-                                } label: {
-                                    Image(systemName: "magnifyingglass")
-                                        .foregroundColor(.primary)
-                                }
-                                .buttonStyle(PressableButtonStyle())
+    // iPad / regular width: the list on the left, the selected article on the
+    // right. Tapping a row selects it into the detail pane instead of jumping
+    // straight to Safari.
+    private var iPadBody: some View {
+        NavigationSplitView {
+            listColumn(isSplit: true)
+                .navigationBarHidden(true)
+        } detail: {
+            NavigationStack {
+                if let selectedItem {
+                    ArticleDetailPane(
+                        item: selectedItem,
+                        theme: theme,
+                        onOpen: { openAndMarkRead(selectedItem) },
+                        onToggleRead: { toggleRead(selectedItem.url) },
+                        onNotes: { notesItem = selectedItem })
+                } else {
+                    detailPlaceholder
+                }
+            }
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
 
-                                Button { groupByFolder.toggle() } label: {
-                                    // The fill vs. outline glyph already signals on/off;
-                                    // dim it while a search is overriding grouping.
-                                    Image(systemName: groupByFolder ? "folder.fill" : "folder")
-                                        .foregroundColor(.primary.opacity(
-                                            groupByFolder ? (effectiveGrouped ? 1.0 : 0.4) : 0.6))
-                                }
-                                .buttonStyle(PressableButtonStyle())
+    private var detailPlaceholder: some View {
+        ZStack {
+            theme.appBackground.ignoresSafeArea()
+            VStack(spacing: 12) {
+                Image(systemName: "text.book.closed")
+                    .font(.system(size: 46))
+                    .foregroundStyle(theme.gradient.opacity(0.5))
+                Text("Select an article")
+                    .scaledFont(.headline)
+                    .foregroundColor(.secondary)
+                Text("Pick something from the list to read it here.")
+                    .scaledFont(.subheadline)
+                    .foregroundColor(.secondary.opacity(0.7))
+                    .multilineTextAlignment(.center)
+            }
+            .padding()
+        }
+    }
 
-                                Button { showSettings = true } label: {
-                                    Image(systemName: "gearshape.fill")
-                                        .foregroundColor(.primary)
-                                }
-                                .buttonStyle(PressableButtonStyle())
-                            }
-                            .font(isRegular ? .title3 : .body)
-                            .imageScale(.large)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white)
-                                    .shadow(color: .black.opacity(0.08), radius: 3, x: 0, y: 1)
-                            )
-                            .overlay(
-                                Capsule().strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
-                            )
-                        }
-
-                        Picker("Filter", selection: $filter) {
-                            ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 22)
-                    .padding(.bottom, 20)
-                    .frame(maxWidth: contentMaxWidth)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(theme.gradient, lineWidth: 1.5)
-                    )
-                    .shadow(color: theme.start.opacity(0.15), radius: 8, x: 0, y: 3)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-
-                    // Search field slides in just below the header when the
-                    // magnifying glass is tapped (QuickNote's pattern), so the
-                    // keyboard never hides it.
-                    if isSearchVisible {
-                        searchBar
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    }
-
-                    if filtered.isEmpty {
-                        Spacer()
-                        Image(systemName: "bookmark")
-                            .font(.system(size: 48))
-                            .foregroundStyle(theme.gradient.opacity(0.5))
-                            .padding(.bottom, 12)
-                        Text(searchText.isEmpty ? "Nothing here yet" : "No results")
-                            .scaledFont(.subheadline)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                    } else {
-                        HStack(spacing: 0) {
-                            Spacer(minLength: 0)
-                            List {
-                                if effectiveGrouped {
-                                    ForEach(groupedSections, id: \.folder) { section in
-                                        DisclosureGroup(isExpanded: expandedBinding(for: section.folder)) {
-                                            ForEach(section.items, id: \.url) { item in
-                                                ItemRow(item: item, showFolder: false,
-                                                    isPending: isPendingClassification(item),
-                                                    theme: theme,
-                                                    onTap:        { openAndMarkRead(item) },
-                                                    onToggleRead: { toggleRead(item.url) },
-                                                    onDelete:     { delete(item.url) },
-                                                    onNoteTap:    { notesItem = item },
-                                                    onOfflineRead: { readerItem = item })
-                                                    .cardRow()
-                                            }
-                                        } label: {
-                                            FolderSectionHeader(
-                                                name: section.folder,
-                                                count: section.items.count,
-                                                showDot: !expandedBinding(for: section.folder).wrappedValue
-                                                    && recentlyClassifiedFolder() == section.folder)
-                                        }
-                                        .cardRow()
-                                    }
-                                } else {
-                                    ForEach(filtered, id: \.url) { item in
-                                        ItemRow(item: item, showFolder: true,
-                                            isPending: isPendingClassification(item),
-                                            theme: theme,
-                                            onTap:        { openAndMarkRead(item) },
-                                            onToggleRead: { toggleRead(item.url) },
-                                            onDelete:     { delete(item.url) },
-                                            onNoteTap:    { notesItem = item },
-                                            onOfflineRead: { readerItem = item })
-                                            .cardRow()
-                                    }
-                                }
-                            }
-                            .listStyle(.plain)
-                            .scrollContentBackground(.hidden)
+    // Header card + reveal-search + list, shared by both layouts.
+    private func listColumn(isSplit: Bool) -> some View {
+        ZStack(alignment: .top) {
+            theme.appBackground.ignoresSafeArea()
+            VStack(spacing: 0) {
+                headerCard
+                // Search field slides in just below the header when the
+                // magnifying glass is tapped (QuickNote's pattern).
+                if isSearchVisible {
+                    searchBar
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                if filtered.isEmpty {
+                    emptyState
+                } else {
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        itemList(isSplit: isSplit)
                             .frame(maxWidth: contentMaxWidth)
-                            Spacer(minLength: 0)
-                        }
+                        Spacer(minLength: 0)
                     }
                 }
             }
-            .navigationBarHidden(true)
-            .preferredColorScheme(.light)
-            .environment(\.noteTextScale, textSize.scale)
-            .onAppear { refresh() }
-            .refreshable { refresh() }
-            .onReceive(NotificationCenter.default.publisher(for: .readLaterDidChange)) { _ in
-                updateItems(ReadLaterStore.shared.visible())
-            }
-            .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
-                let hasPending = items.contains { $0.folder == nil && isPendingClassification($0) }
-                if hasPending || recentlyClassifiedFolder() != nil { tick.toggle() }
-            }
-            .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
-                SyncKeySettingsView()
-            }
-            .sheet(item: $notesItem) { item in
-                NotesEditorView(
-                    item: item,
-                    onSave: { newNotes in
-                        ReadLaterStore.shared.setNotes(url: item.url, notes: newNotes)
-                        updateItems(ReadLaterStore.shared.visible())
-                        ReadLaterStore.shared.syncWithCloud()
-                    },
-                    onOpen: { openAndMarkRead(item) }
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            Image(systemName: "bookmark")
+                .font(.system(size: 48))
+                .foregroundStyle(theme.gradient.opacity(0.5))
+            Text(searchText.isEmpty ? "Nothing here yet" : "No results")
+                .scaledFont(.subheadline)
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // Header — a white section with black text and icons, framed by a subtle
+    // themed gradient outline (echoing QuickNote's focused-field border).
+    private var headerCard: some View {
+        VStack(spacing: 18) {
+            HStack(alignment: .center) {
+                // Title, with the unread count as a quiet subtitle beneath it.
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Research Sync")
+                        .font(titleFont)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    if unreadCount > 0 {
+                        Text("\(unreadCount) unread")
+                            .scaledFont(.subheadline, weight: .medium)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Spacer()
+                // Search / folder / settings grouped on a subtle raised pill.
+                HStack(spacing: 18) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { isSearchVisible = true }
+                        isSearchFocused = true
+                    } label: {
+                        Image(systemName: "magnifyingglass").foregroundColor(.primary)
+                    }
+                    .buttonStyle(PressableButtonStyle())
+
+                    Button { groupByFolder.toggle() } label: {
+                        Image(systemName: groupByFolder ? "folder.fill" : "folder")
+                            .foregroundColor(.primary.opacity(
+                                groupByFolder ? (effectiveGrouped ? 1.0 : 0.4) : 0.6))
+                    }
+                    .buttonStyle(PressableButtonStyle())
+
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape.fill").foregroundColor(.primary)
+                    }
+                    .buttonStyle(PressableButtonStyle())
+                }
+                .font(isRegular ? .title3 : .body)
+                .imageScale(.large)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background(
+                    Capsule().fill(Color.white)
+                        .shadow(color: .black.opacity(0.08), radius: 3, x: 0, y: 1)
                 )
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.06), lineWidth: 1))
             }
-            .sheet(item: $readerItem) { item in
-                OfflineReaderView(item: item)
+
+            Picker("Filter", selection: $filter) {
+                ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 22)
+        .padding(.bottom, 20)
+        .frame(maxWidth: contentMaxWidth)
+        .background(RoundedRectangle(cornerRadius: 20).fill(Color.white))
+        .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(theme.gradient, lineWidth: 1.5))
+        .shadow(color: theme.start.opacity(0.15), radius: 8, x: 0, y: 3)
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    private func itemList(isSplit: Bool) -> some View {
+        List {
+            if effectiveGrouped {
+                ForEach(groupedSections, id: \.folder) { section in
+                    DisclosureGroup(isExpanded: expandedBinding(for: section.folder)) {
+                        ForEach(section.items, id: \.url) { item in
+                            row(for: item, showFolder: false, isSplit: isSplit).cardRow()
+                        }
+                    } label: {
+                        FolderSectionHeader(
+                            name: section.folder,
+                            count: section.items.count,
+                            showDot: !expandedBinding(for: section.folder).wrappedValue
+                                && recentlyClassifiedFolder() == section.folder)
+                    }
+                    .cardRow()
+                }
+            } else {
+                ForEach(filtered, id: \.url) { item in
+                    row(for: item, showFolder: true, isSplit: isSplit).cardRow()
+                }
             }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .refreshable { refresh() }
+    }
+
+    private func row(for item: ReadLaterItem, showFolder: Bool, isSplit: Bool) -> some View {
+        ItemRow(
+            item: item,
+            showFolder: showFolder,
+            isPending: isPendingClassification(item),
+            theme: theme,
+            isSelected: isSplit && item.url == selectedURL,
+            onTap: {
+                if isSplit { select(item) } else { openAndMarkRead(item) }
+            },
+            onToggleRead: { toggleRead(item.url) },
+            onDelete: { delete(item.url) },
+            onNoteTap: { notesItem = item },
+            onOfflineRead: {
+                if isSplit { select(item) } else { readerItem = item }
+            })
+    }
+
+    // Selecting on iPad only fills the detail pane — it deliberately does NOT
+    // mark the item read, so it won't vanish from an "Unread" filter mid-read.
+    private func select(_ item: ReadLaterItem) {
+        selectedURL = item.url
     }
 
     private func refresh() {
@@ -410,6 +472,8 @@ struct ItemRow: View {
     let showFolder: Bool
     let isPending: Bool
     let theme: AppTheme
+    // Highlights the row as the current detail selection (iPad only).
+    var isSelected: Bool = false
     let onTap: () -> Void
     let onToggleRead: () -> Void
     let onDelete: () -> Void
@@ -494,7 +558,10 @@ struct ItemRow: View {
         }
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                .strokeBorder(
+                    isSelected ? AnyShapeStyle(theme.gradient)
+                               : AnyShapeStyle(Color.primary.opacity(0.06)),
+                    lineWidth: isSelected ? 2 : 1)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
@@ -712,5 +779,126 @@ struct SyncKeySettingsView: View {
         } catch {
             return nil
         }
+    }
+}
+
+// The iPad detail pane: renders the offline reader inline when a copy exists,
+// otherwise an article-info view with a prominent "Open in Safari" action. The
+// toolbar carries read-toggle, notes, and open actions.
+struct ArticleDetailPane: View {
+    let item: ReadLaterItem
+    let theme: AppTheme
+    let onOpen: () -> Void
+    let onToggleRead: () -> Void
+    let onNotes: () -> Void
+
+    private var hostname: String { URL(string: item.url)?.host ?? item.url }
+    private var hasNotes: Bool { !(item.notes ?? "").isEmpty }
+
+    var body: some View {
+        Group {
+            if item.offline == .saved {
+                OfflineArticleReader(item: item)
+                    .ignoresSafeArea(edges: .bottom)
+            } else {
+                ArticleInfoView(item: item, theme: theme, onOpen: onOpen)
+            }
+        }
+        .navigationTitle(hostname)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: onToggleRead) {
+                    Image(systemName: item.read ? "envelope.badge" : "checkmark.circle")
+                }
+                .help(item.read ? "Mark unread" : "Mark read")
+
+                Button(action: onNotes) {
+                    Image(systemName: hasNotes ? "note.text" : "note.text.badge.plus")
+                        .foregroundColor(hasNotes ? theme.end : nil)
+                }
+                .help("Notes")
+
+                Button(action: onOpen) {
+                    Image(systemName: "safari")
+                }
+                .help("Open in Safari")
+            }
+        }
+    }
+}
+
+// Shown in the iPad detail pane when there's no offline copy to read inline.
+private struct ArticleInfoView: View {
+    let item: ReadLaterItem
+    let theme: AppTheme
+    let onOpen: () -> Void
+
+    private var hostname: String { URL(string: item.url)?.host ?? item.url }
+    private var faviconURL: URL? {
+        URL(string: "https://www.google.com/s2/favicons?domain=\(hostname)&sz=128")
+    }
+
+    var body: some View {
+        ZStack {
+            theme.appBackground.ignoresSafeArea()
+            VStack(spacing: 18) {
+                AsyncImage(url: faviconURL) { image in
+                    image.resizable().scaledToFit()
+                } placeholder: {
+                    Image(systemName: "globe")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 56, height: 56)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                VStack(spacing: 6) {
+                    Text(item.title)
+                        .scaledFont(.title3, weight: .semibold)
+                        .multilineTextAlignment(.center)
+                    Text(hostname)
+                        .scaledFont(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                offlineStatus
+
+                Button(action: onOpen) {
+                    Label("Open in Safari", systemImage: "safari")
+                        .scaledFont(.body, weight: .semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 22)
+                        .padding(.vertical, 12)
+                        .background(theme.gradient)
+                        .clipShape(Capsule())
+                        .shadow(color: theme.start.opacity(0.3), radius: 6, x: 0, y: 3)
+                }
+                .buttonStyle(PressableButtonStyle())
+                .padding(.top, 4)
+            }
+            .padding(40)
+            .frame(maxWidth: 440)
+        }
+    }
+
+    @ViewBuilder
+    private var offlineStatus: some View {
+        switch item.offline {
+        case .requested:
+            offlineLabel("Saving an offline copy…", icon: "arrow.down.circle")
+        case .unavailable:
+            offlineLabel("Offline copy unavailable", icon: "book.closed")
+        case .none:
+            offlineLabel("No offline copy yet", icon: "book.closed")
+        case .saved:
+            EmptyView()
+        }
+    }
+
+    private func offlineLabel(_ text: String, icon: String) -> some View {
+        Label(text, systemImage: icon)
+            .scaledFont(.footnote)
+            .foregroundColor(.secondary)
     }
 }

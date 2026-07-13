@@ -5,9 +5,11 @@ import WebKit
 // reading. The body was sanitized on the capture side (DOMPurify) and is
 // re-wrapped here in a minimal reader document; JavaScript is disabled in the
 // web view as defense in depth.
-struct OfflineReaderView: View {
+// The reader's content — loads the cached body and renders it in a JS-disabled
+// web view. Embeddable and chrome-free: used both by the iPhone sheet
+// (OfflineReaderView) and the iPad detail pane.
+struct OfflineArticleReader: View {
     let item: ReadLaterItem
-    @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
     private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
 
@@ -20,41 +22,29 @@ struct OfflineReaderView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                switch state {
-                case .loading:
-                    ProgressView("Loading…")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                case .ready(let article):
-                    ReaderWebView(html: readerDocument(article), baseURL: URL(string: item.url))
-                        .ignoresSafeArea(edges: .bottom)
-                case .failed(let message):
-                    VStack(spacing: 12) {
-                        Image(systemName: "wifi.slash")
-                            .font(.system(size: 40))
-                            .foregroundColor(.secondary.opacity(0.5))
-                        Text(message)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 32)
-                    }
+        Group {
+            switch state {
+            case .loading:
+                ProgressView("Loading…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .ready(let article):
+                ReaderWebView(html: readerDocument(article), baseURL: URL(string: item.url))
+                    .ignoresSafeArea(edges: .bottom)
+            case .failed(let message):
+                VStack(spacing: 12) {
+                    Image(systemName: "wifi.slash")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text(message)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 32)
                 }
-            }
-            .navigationTitle("Reader")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
-                ToolbarItem(placement: .primaryAction) {
-                    if let url = URL(string: item.url) {
-                        Link(destination: url) { Image(systemName: "safari") }
-                    }
-                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        // Reload when switched to a different article in the iPad detail pane.
+        .id(item.url)
         .onAppear(perform: load)
     }
 
@@ -142,6 +132,31 @@ struct OfflineReaderView: View {
           article { margin: 0; border-radius: 0; box-shadow: none; padding: 1.5rem 1.25rem 4rem; }
         }
         """
+    }
+}
+
+// iPhone sheet presentation: the embeddable reader wrapped in a nav bar with a
+// Done button and an "open in Safari" link.
+struct OfflineReaderView: View {
+    let item: ReadLaterItem
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            OfflineArticleReader(item: item)
+                .navigationTitle("Reader")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { dismiss() }
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        if let url = URL(string: item.url) {
+                            Link(destination: url) { Image(systemName: "safari") }
+                        }
+                    }
+                }
+        }
     }
 }
 
