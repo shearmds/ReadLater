@@ -8,6 +8,8 @@ import WebKit
 struct OfflineReaderView: View {
     let item: ReadLaterItem
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
+    private var theme: AppTheme { AppTheme(rawValue: themeName) ?? .ocean }
 
     @State private var state: LoadState = .loading
 
@@ -75,7 +77,7 @@ struct OfflineReaderView: View {
         <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <style>\(Self.readerCSS)</style>
+        <style>\(readerCSS(theme: theme))</style>
         </head>
         <body>
         <article>
@@ -96,31 +98,51 @@ struct OfflineReaderView: View {
             .replacingOccurrences(of: ">", with: "&gt;")
     }
 
-    private static let readerCSS = """
-    :root { color-scheme: light dark; }
-    body {
-      margin: 0;
-      font: 18px/1.65 -apple-system, system-ui, sans-serif;
-      color: #1c1c1e; background: #fff;
-      -webkit-text-size-adjust: 100%;
+    // Light-locked and tinted to the selected theme, matching the app family's
+    // readers: the article sits on a floating white page over a faint theme
+    // wash, with a themed gradient rule under the header and themed links.
+    private func readerCSS(theme: AppTheme) -> String {
+        """
+        :root {
+          color-scheme: light;
+          --theme-start: \(theme.start.hexString);
+          --theme-end: \(theme.end.hexString);
+        }
+        body {
+          margin: 0;
+          font: 18px/1.65 -apple-system, system-ui, sans-serif;
+          color: #1c1c1e;
+          background: color-mix(in srgb, var(--theme-start) 5%, #ffffff);
+          -webkit-text-size-adjust: 100%;
+        }
+        article {
+          max-width: 42rem;
+          margin: 1.5rem auto 4rem;
+          padding: 2rem 1.5rem 4rem;
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+        header {
+          border-width: 0 0 2px;
+          border-style: solid;
+          border-image: linear-gradient(90deg, var(--theme-start), var(--theme-end)) 1;
+          padding-bottom: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 0.4rem; }
+        .site { color: #8e8e93; font-size: 0.95rem; }
+        .content img, .content figure, .content video { max-width: 100%; height: auto; }
+        .content figure { margin: 1.5rem 0; }
+        .content figcaption { font-size: 0.85rem; color: #8e8e93; text-align: center; margin-top: 0.4rem; }
+        .content a { color: var(--theme-end); }
+        .content pre { overflow-x: auto; background: #f2f2f7; padding: 1rem; border-radius: 8px; font-size: 0.85rem; }
+        .content blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: 3px solid var(--theme-end); color: #48484a; }
+        @media (max-width: 46rem) {
+          article { margin: 0; border-radius: 0; box-shadow: none; padding: 1.5rem 1.25rem 4rem; }
+        }
+        """
     }
-    article { max-width: 42rem; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
-    header { border-bottom: 1px solid #e5e5ea; padding-bottom: 1rem; margin-bottom: 1.5rem; }
-    h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 0.4rem; }
-    .site { color: #8e8e93; font-size: 0.95rem; }
-    .content img, .content figure, .content video { max-width: 100%; height: auto; }
-    .content figure { margin: 1.5rem 0; }
-    .content figcaption { font-size: 0.85rem; color: #8e8e93; text-align: center; margin-top: 0.4rem; }
-    .content a { color: #007aff; }
-    .content pre { overflow-x: auto; background: #f2f2f7; padding: 1rem; border-radius: 8px; font-size: 0.85rem; }
-    .content blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: 3px solid #d1d1d6; color: #48484a; }
-    @media (prefers-color-scheme: dark) {
-      body { color: #e5e5ea; background: #1c1c1e; }
-      header { border-bottom-color: #38383a; }
-      .content pre { background: #2c2c2e; }
-      .content blockquote { border-left-color: #48484a; color: #aeaeb2; }
-    }
-    """
 }
 
 // Minimal WKWebView wrapper that renders a self-contained HTML string with

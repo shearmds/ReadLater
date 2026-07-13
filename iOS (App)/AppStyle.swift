@@ -128,3 +128,15 @@ extension AppTheme {
         )
     }
 }
+
+extension Color {
+    /// The color as a `#RRGGBB` string, for handing a theme color to embedded
+    /// web content (e.g. the offline reader's WKWebView CSS).
+    var hexString: String {
+        let ui = UIColor(self)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: &a)
+        return String(format: "#%02X%02X%02X",
+                      Int(round(r * 255)), Int(round(g * 255)), Int(round(b * 255)))
+    }
+}
