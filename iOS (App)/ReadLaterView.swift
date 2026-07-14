@@ -264,6 +264,11 @@ struct ReadLaterView: View {
                             .frame(maxWidth: contentMaxWidth)
                         Spacer(minLength: 0)
                     }
+                    // A persistent gap between the header and the list. Because the
+                    // list clips scrolling rows to its own frame, this whitespace
+                    // stays put as the list scrolls, so rows never butt up against
+                    // the header card.
+                    .padding(.top, 18)
                 }
             }
         }
@@ -506,16 +511,25 @@ struct ItemRow: View {
                     Text(hostname)
                         .scaledFont(hSizeClass == .regular ? .subheadline : .caption)
                         .foregroundColor(.secondary)
+                        // Let a long host truncate rather than squeeze the tag.
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .layoutPriority(0)
                     // Only the AI-assigned folder tag is shown; the older
                     // URL-derived category tag was redundant with it.
                     if showFolder, let folder = item.folder {
                         Text(folder)
                             .font(.caption2.weight(.semibold))
                             .foregroundColor(theme.end)
+                            .lineLimit(1)
+                            // Keep the capsule at its natural width so labels
+                            // like "Entertainment" never wrap onto two lines.
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
                             .background(theme.end.opacity(0.15))
                             .clipShape(Capsule())
+                            .layoutPriority(1)
                     } else if item.folder == nil && isPending {
                         // Shown regardless of showFolder (unlike the folder tag) —
                         // meaningful even inside a collapsed "Unsorted" group, since
@@ -614,7 +628,9 @@ struct ItemRow: View {
     private var hasNotes: Bool { !(item.notes ?? "").isEmpty }
 
     private var hostname: String {
-        URL(string: item.url).flatMap { $0.host } ?? item.url
+        let host = URL(string: item.url).flatMap { $0.host } ?? item.url
+        // Drop the "www." prefix so more room is left for the folder tag.
+        return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 
     private var faviconURL: URL? {

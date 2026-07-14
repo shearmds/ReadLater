@@ -11,12 +11,12 @@ body {
   /* A whisper of the theme's color behind the content, matching the app. */
   background: linear-gradient(180deg, #ffffff 0%, rgba(38, 198, 218, 0.06) 100%);
   color: #1a1a1a;
-  width: 320px;
-}
-
-/* iOS Safari presents the popover at full device width. */
-@media (pointer: coarse) {
-  body { width: 100%; }
+  /* A fixed width so the popover sizes itself correctly. On iPadOS a
+     percentage width has no containing block to resolve against and the
+     popover collapses to min-content, so we always pin an explicit width
+     and only cap it to the viewport on a narrow iPhone. */
+  width: 340px;
+  max-width: 100vw;
 }
 
 #app { display: flex; flex-direction: column; }
