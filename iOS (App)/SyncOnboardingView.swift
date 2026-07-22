@@ -26,19 +26,21 @@ struct SyncOnboardingView: View {
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
 
-                Button(page == 0 ? "Next" : "Got it") {
+                Button {
                     if page == 0 {
                         withAnimation { page = 1 }
                     } else {
                         dismiss()
                     }
+                } label: {
+                    Text(page == 0 ? "Next" : "Got it")
+                        .scaledFont(.headline, weight: .semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PressableButtonStyle())
-                .scaledFont(.headline, weight: .semibold)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .contentShape(Rectangle())
                 .background(theme.gradient, in: RoundedRectangle(cornerRadius: 14))
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
