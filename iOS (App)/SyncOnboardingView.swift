@@ -53,7 +53,7 @@ struct SyncOnboardingView: View {
                 .scaledFont(.largeTitle)
                 .foregroundStyle(theme.gradient)
                 .font(.system(size: 56))
-            Text("Welcome to Read Later")
+            Text("Welcome to Research Sync")
                 .scaledFont(.title2, weight: .bold)
             Text("Save pages here and read them later — no account, no sign-in. This app works completely on its own.")
                 .scaledFont(.body)
