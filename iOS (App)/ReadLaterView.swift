@@ -8,6 +8,8 @@ struct ReadLaterView: View {
     @State private var showSettings = false
     @State private var notesItem: ReadLaterItem?
     @State private var readerItem: ReadLaterItem?
+    @AppStorage("hasSeenSyncOnboarding") private var hasSeenSyncOnboarding: Bool = false
+    @State private var showOnboarding = false
     // iPad master/detail selection (by URL, so it survives list refreshes).
     @State private var selectedURL: String?
     @AppStorage("appTheme") private var themeName: String = AppTheme.ocean.rawValue
@@ -165,7 +167,13 @@ struct ReadLaterView: View {
         }
         .preferredColorScheme(.light)
         .environment(\.noteTextScale, textSize.scale)
-        .onAppear { refresh() }
+        .onAppear {
+            refresh()
+            if !hasSeenSyncOnboarding {
+                showOnboarding = true
+                hasSeenSyncOnboarding = true
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .readLaterDidChange)) { _ in
             updateItems(ReadLaterStore.shared.visible())
         }
@@ -175,6 +183,9 @@ struct ReadLaterView: View {
         }
         .sheet(isPresented: $showSettings, onDismiss: { refresh() }) {
             SyncKeySettingsView()
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            SyncOnboardingView()
         }
         .sheet(item: $notesItem) { item in
             NotesEditorView(

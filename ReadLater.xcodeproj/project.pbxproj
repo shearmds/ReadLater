@@ -11,7 +11,7 @@
 		4C6E4A182FE6CD1E00D1DC24 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6E4A172FE6CD1E00D1DC24 /* WidgetKit.framework */; };
 		4C6E4A1A2FE6CD1E00D1DC24 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6E4A192FE6CD1E00D1DC24 /* SwiftUI.framework */; };
 		4C6E4A252FE6CD1F00D1DC24 /* Read This Later WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		79DDE1652FFB0C1000F6A6BA /* ReadLater Extension (iOS).appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 79DDE1612FFB0AA300F6A6BA /* ReadLater Extension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		79DDE1652FFB0C1000F6A6BA /* ReadLaterExtensioniOS.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 79DDE1612FFB0AA300F6A6BA /* ReadLaterExtensioniOS.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,7 +47,7 @@
 			files = (
 				4C63CDBB2FD0C5C50095DCAE /* ReadLater Share.appex in Embed Foundation Extensions */,
 				4C6E4A252FE6CD1F00D1DC24 /* Read This Later WidgetExtension.appex in Embed Foundation Extensions */,
-				79DDE1652FFB0C1000F6A6BA /* ReadLater Extension (iOS).appex in Embed Foundation Extensions */,
+				79DDE1652FFB0C1000F6A6BA /* ReadLaterExtensioniOS.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,7 +61,7 @@
 		4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Read This Later WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C6E4A172FE6CD1E00D1DC24 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		4C6E4A192FE6CD1E00D1DC24 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		79DDE1612FFB0AA300F6A6BA /* ReadLater Extension (iOS).appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ReadLaterExtensioniOS.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		79DDE1612FFB0AA300F6A6BA /* ReadLaterExtensioniOS.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ReadLaterExtensioniOS.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		79DDE1642FFB0B7E00F6A6BA /* ReadLater Extension (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ReadLater Extension (iOS).entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -245,7 +245,7 @@
 				4C63CCEC2FD079910095DCAE /* ReadLater.app */,
 				4C63CDB12FD0C5C50095DCAE /* ReadLater Share.appex */,
 				4C6E4A162FE6CD1E00D1DC24 /* Read This Later WidgetExtension.appex */,
-				79DDE1612FFB0AA300F6A6BA /* ReadLater Extension (iOS).appex */,
+				79DDE1612FFB0AA300F6A6BA /* ReadLaterExtensioniOS.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -348,7 +348,7 @@
 			packageProductDependencies = (
 			);
 			productName = "ReadLater Extension (iOS)";
-			productReference = 79DDE1612FFB0AA300F6A6BA /* ReadLater Extension (iOS).appex */;
+			productReference = 79DDE1612FFB0AA300F6A6BA /* ReadLaterExtensioniOS.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
