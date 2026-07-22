@@ -38,6 +38,7 @@ struct SyncOnboardingView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
+                .contentShape(Rectangle())
                 .background(theme.gradient, in: RoundedRectangle(cornerRadius: 14))
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
